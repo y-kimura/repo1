@@ -22,9 +22,9 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
@@ -59,7 +59,29 @@ public class TagPanel extends JPanel {
         add(newTagInput);
         add(setButton("add"));
 
-        JTree tree = new JTree() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("JavaDrive");
+
+        DefaultMutableTreeNode swing = new DefaultMutableTreeNode("Swing");
+        DefaultMutableTreeNode java2d = new DefaultMutableTreeNode("Java2D");
+        DefaultMutableTreeNode java3d = new DefaultMutableTreeNode("Java3D");
+        DefaultMutableTreeNode javamail = new DefaultMutableTreeNode("JavaMail");
+
+        DefaultMutableTreeNode swingSub1 = new DefaultMutableTreeNode("JLabel");
+        DefaultMutableTreeNode swingSub2 = new DefaultMutableTreeNode("JButton");
+        DefaultMutableTreeNode swingSub3 = new DefaultMutableTreeNode("JTextField");
+
+        swing.add(swingSub1);
+        swing.add(swingSub2);
+        swing.add(swingSub3);
+
+        root.add(swing);
+        root.add(java2d);
+        root.add(java3d);
+        root.add(javamail);
+
+        DefaultTreeModel model = new DefaultTreeModel(root);
+
+        JTree tree = new JTree(model) {
         	  @Override public void updateUI() {
         	    setCellRenderer(null);
         	    setCellEditor(null);
@@ -71,8 +93,8 @@ public class TagPanel extends JPanel {
         };
 
         boolean b = true;
-        TreeModel model = tree.getModel();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+        //TreeModel model = tree.getModel();
+       // DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
         Enumeration<?> e = root.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
