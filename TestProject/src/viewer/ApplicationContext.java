@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import viewer.model.Category;
 import java.util.Map;
 import java.util.Properties;
 
@@ -23,22 +24,23 @@ import viewer.util.PropertyWriter;
 import viewer.view.conf.WindowConfig;
 
 public class ApplicationContext {
-	
+
 	public static final String PROP_MAINWINDOW = "MainWindow";
 	public static final String PROP_TAGSEARCHWINDOW = "TagSearchWindow";
 	public static final String PROP_ITEMLIST = "ItemList";
 	public static final String PROP_TAGLIST = "TagList";
+	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
 	public static final String SMB_DIR = "d:\\testtest\\ss";
 	public static final String MOVIE_DIR = "d:\\testtest";
-	
-	
+
+
 	private PropertyChangeSupport listeners;
 	private Properties props;
 	private File file;
-	
+
 	public int selectIndex;
-	
+
 	public ApplicationContext(File f){
         this.listeners = new PropertyChangeSupport(this);
         this.props = new Properties();
@@ -46,7 +48,7 @@ public class ApplicationContext {
         if( file.exists() && file.canRead() && file.isFile() ){
             this.props = PropertiesUtils.load(file);
         }
-		
+
 	    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 	        public void run(){
 	        	finalizeItemList();
@@ -66,6 +68,7 @@ public class ApplicationContext {
 //	            finalizeImageBackgroundColor();
 //	            finalizeImageListSizeVisible();
 	            finalizeItemTagSet();
+	    	    finalizeCategoryList();
 	            PropertiesUtils.save(file, props);
 	        }
 	    }));
@@ -73,8 +76,9 @@ public class ApplicationContext {
 	    initializeMainWindowConfig();
 	    initializeTagSearchWindowConfig();
 	    initializeItemTagSet();
+	    initializeCategoryList();
 	}
-	
+
     private WindowConfig mainwindow = new WindowConfig(PROP_MAINWINDOW);
     protected void initializeMainWindowConfig(){
         mainwindow.read(props);
@@ -90,7 +94,7 @@ public class ApplicationContext {
     public Map<String, Item> itemFullMap = new HashMap<String, Item>();
     public List<Item> filterItemList = new ArrayList<Item>();
     public List<Item> sortItemFullList = new ArrayList<Item>();
-    
+
     public void filterItemList() {
 		filterItemList = new ArrayList<Item>();
     	if (filterTagList.isEmpty()) {
@@ -124,7 +128,7 @@ public class ApplicationContext {
     	}
     	listeners.firePropertyChange(PROP_ITEMLIST, null, filterItemList);
     }
-    
+
 	public void sortItemList() {
     	sortItemFullList = new ArrayList<Item>();
     	for (Item item: itemFullMap.values()) {
@@ -139,7 +143,7 @@ public class ApplicationContext {
     }
 
     protected void initializeItemList(){
-    	
+
         Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("ITEMLIST.dat"));
         for( PropertyReader pr: reader ){
         	Item item = new Item();
@@ -153,7 +157,7 @@ public class ApplicationContext {
         	}
         	itemFullMap.put(item.name, item);
         }
-        
+
 		File[] files = new File(MOVIE_DIR).listFiles();
 		for (File file : files) {
 			if (file.isDirectory()) {
@@ -171,7 +175,7 @@ public class ApplicationContext {
 				itemFullMap.put(item.name, item);
 			}
 		}
-		
+
 		Map<String, Item> tmpItemFullMap = new HashMap<String, Item>(itemFullMap);
 		for (Item item: tmpItemFullMap.values()) {
 			if (item.file == null || !item.file.exists()) {
@@ -181,7 +185,7 @@ public class ApplicationContext {
 		sortItemList();
 		filterItemList();
     }
-    
+
     protected void finalizeItemList(){
         if(!itemFullMap.isEmpty()){
             List<Item> beans = new ArrayList<Item>();
@@ -211,15 +215,15 @@ public class ApplicationContext {
 //        listeners.firePropertyChange(PROP_IMAGEFILELIST, old, this.viewList);
 //        getHistory().add(list.getName(), list.getType(), list.getPath());
 //    }
-    
+
     public void addItemListChangeListener(PropertyChangeListener listener){
         listeners.addPropertyChangeListener(PROP_ITEMLIST, listener);
     }
     public void removeItemListChangeListener(PropertyChangeListener listener){
         listeners.removePropertyChangeListener(PROP_ITEMLIST, listener);
     }
-    
-    
+
+
     private TagList tagList = new TagList();
     protected void initializeItemTagSet(){
         Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("TAGLIST.dat"));
@@ -243,30 +247,55 @@ public class ApplicationContext {
     public TagList getTagList(){
         return tagList;
     }
-    
+
     public void addTagListChangeListener(PropertyChangeListener listener){
         listeners.addPropertyChangeListener(PROP_TAGLIST, listener);
     }
     public void removeTagListChangeListener(PropertyChangeListener listener){
         listeners.removePropertyChangeListener(PROP_TAGLIST, listener);
     }
-    
+
     public void addNewTag(String name) {
     	tagList.add(name);
     	listeners.firePropertyChange(PROP_TAGLIST, null, tagList);
     }
-    
-    
+
+    private List<Category> categoryList = new ArrayList<Category>();
+    protected void initializeCategoryList(){
+        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("CATEGORYLIST.dat"));
+        for( PropertyReader pr: reader ){
+        	Tag tag = new Tag();
+        	tag.id = pr.intValue("ID", 0);
+        	tag.name = pr.stringValue("NAME", "<no-name>");
+        	tagList.add(tag);
+        }
+    }
+    protected void finalizeCategoryList(){
+        if(!tagList.tagList.isEmpty()){
+            IOUtils.writeIterableToPropertiesFile(categoryList, new File("CATEGORYLIST.dat"), new PropertyBuilder<Category>() {
+                public void build( Category bean, PropertyWriter out ){
+                    out.set("ID", bean.);
+                    out.set("NAME", bean.name);
+                    out.set("ORDER", bean.order);
+                }
+            });
+        }
+    }
+
+    public List<Category> getCategoryList(){
+        return categoryList;
+    }
+
     public List<Integer> filterTagList = new ArrayList<Integer>();
     public int filterType = 1;
-    
+
     public void addFilterListChangeListener(PropertyChangeListener listener){
         listeners.addPropertyChangeListener(PROP_FILTERLIST, listener);
     }
     public void removeFilterListChangeListener(PropertyChangeListener listener){
         listeners.removePropertyChangeListener(PROP_FILTERLIST, listener);
     }
-    
+
     /*-----------------------------------------------------------------------
      * TagSearchWindowInfo
      *----------------------------------------------------------------------*/

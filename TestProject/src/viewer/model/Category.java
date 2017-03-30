@@ -1,6 +1,6 @@
 package viewer.model;
 
-public class Categoly {
+public class Category {
 	public int id;
 	public int order;
 	public String name;
