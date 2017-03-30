@@ -9,10 +9,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import viewer.model.Category;
 import java.util.Map;
 import java.util.Properties;
 
+import viewer.model.Category;
 import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagList;
@@ -31,8 +31,8 @@ public class ApplicationContext {
 	public static final String PROP_TAGLIST = "TagList";
 	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
-	public static final String SMB_DIR = "d:\\testtest\\ss";
-	public static final String MOVIE_DIR = "d:\\testtest";
+	public static final String SMB_DIR = "e:\\test\\ss";
+	public static final String MOVIE_DIR = "e:\\test";
 
 
 	private PropertyChangeSupport listeners;
@@ -231,6 +231,8 @@ public class ApplicationContext {
         	Tag tag = new Tag();
         	tag.id = pr.intValue("ID", 0);
         	tag.name = pr.stringValue("NAME", "<no-name>");
+        	tag.order = pr.intValue("ORDER", 0);
+        	tag.categoryId = pr.intValue("CATEGORYID", 0);
         	tagList.add(tag);
         }
     }
@@ -240,6 +242,8 @@ public class ApplicationContext {
                 public void build( Tag bean, PropertyWriter out ){
                     out.set("ID", bean.id);
                     out.set("NAME", bean.name);
+                    out.set("ORDER", bean.order);
+                    out.set("CATEGORYID", bean.categoryId);
                 }
             });
         }
@@ -264,17 +268,25 @@ public class ApplicationContext {
     protected void initializeCategoryList(){
         Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("CATEGORYLIST.dat"));
         for( PropertyReader pr: reader ){
-        	Tag tag = new Tag();
-        	tag.id = pr.intValue("ID", 0);
-        	tag.name = pr.stringValue("NAME", "<no-name>");
-        	tagList.add(tag);
+        	Category category = new Category();
+        	category.id = pr.intValue("ID", 0);
+        	category.name = pr.stringValue("NAME", "<no-name>");
+        	category.order = pr.intValue("ORDER", 0);
+        	categoryList.add(category);
+        }
+        if (categoryList.size() == 0) {
+	    	Category category = new Category();
+	    	category.id = 0;
+	    	category.name = "未分類";
+	    	category.order = 0;
+	    	categoryList.add(category);
         }
     }
     protected void finalizeCategoryList(){
         if(!tagList.tagList.isEmpty()){
             IOUtils.writeIterableToPropertiesFile(categoryList, new File("CATEGORYLIST.dat"), new PropertyBuilder<Category>() {
                 public void build( Category bean, PropertyWriter out ){
-                    out.set("ID", bean.);
+                    out.set("ID", bean.id);
                     out.set("NAME", bean.name);
                     out.set("ORDER", bean.order);
                 }

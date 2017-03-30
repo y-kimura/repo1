@@ -31,7 +31,9 @@ import javax.swing.tree.TreePath;
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.ApplicationControllerListener;
+import viewer.model.Category;
 import viewer.model.Item;
+import viewer.model.Tag;
 import viewer.model.TagList;
 
 public class TagPanel extends JPanel {
@@ -59,25 +61,17 @@ public class TagPanel extends JPanel {
         add(newTagInput);
         add(setButton("add"));
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("JavaDrive");
-
-        DefaultMutableTreeNode swing = new DefaultMutableTreeNode("Swing");
-        DefaultMutableTreeNode java2d = new DefaultMutableTreeNode("Java2D");
-        DefaultMutableTreeNode java3d = new DefaultMutableTreeNode("Java3D");
-        DefaultMutableTreeNode javamail = new DefaultMutableTreeNode("JavaMail");
-
-        DefaultMutableTreeNode swingSub1 = new DefaultMutableTreeNode("JLabel");
-        DefaultMutableTreeNode swingSub2 = new DefaultMutableTreeNode("JButton");
-        DefaultMutableTreeNode swingSub3 = new DefaultMutableTreeNode("JTextField");
-
-        swing.add(swingSub1);
-        swing.add(swingSub2);
-        swing.add(swingSub3);
-
-        root.add(swing);
-        root.add(java2d);
-        root.add(java3d);
-        root.add(javamail);
+        // Tagツリー作成
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        for (Category category: context.getCategoryList()) {
+            DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name);
+            for (Tag tag: context.getTagList().tagList) {
+            	if (tag.categoryId == category.id) {
+            		tmpCate.add(new DefaultMutableTreeNode(tag.name));
+            	}
+            }
+        	root.add(tmpCate);
+        }
 
         DefaultTreeModel model = new DefaultTreeModel(root);
 
@@ -86,20 +80,15 @@ public class TagPanel extends JPanel {
         	    setCellRenderer(null);
         	    setCellEditor(null);
         	    super.updateUI();
-        	    //???: JDK 1.6.0 LnF bug???
         	    setCellRenderer(new CheckBoxNodeRenderer());
         	    setCellEditor(new CheckBoxNodeEditor());
         	  }
         };
 
-        boolean b = true;
-        //TreeModel model = tree.getModel();
-       // DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
         Enumeration<?> e = root.breadthFirstEnumeration();
         while (e.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
-            node.setUserObject(new CheckBoxNode(Objects.toString(node.getUserObject(), ""), b));
-            b ^= true;
+            node.setUserObject(new CheckBoxNode(Objects.toString(node.getUserObject(), ""), false));
         }
 
         tree.setEditable(true);
