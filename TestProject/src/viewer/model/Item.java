@@ -39,4 +39,12 @@ public class Item implements Serializable{
 	public void setTags(Set<Integer> tags) {
 		this.tags = tags;
 	}
+
+	public boolean isSelectedTag(int tagId) {
+		if (tags.contains(tagId)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

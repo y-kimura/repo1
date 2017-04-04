@@ -31,15 +31,15 @@ public class ApplicationContext {
 	public static final String PROP_TAGLIST = "TagList";
 	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
-	public static final String SMB_DIR = "e:\\test\\ss";
-	public static final String MOVIE_DIR = "e:\\test";
+	public static final String SMB_DIR = "d:\\testtest\\ss";
+	public static final String MOVIE_DIR = "d:\\testtest";
 
 
 	private PropertyChangeSupport listeners;
 	private Properties props;
 	private File file;
 
-	public int selectIndex;
+	public int selectIndex = -1;
 
 	public ApplicationContext(File f){
         this.listeners = new PropertyChangeSupport(this);
@@ -259,8 +259,8 @@ public class ApplicationContext {
         listeners.removePropertyChangeListener(PROP_TAGLIST, listener);
     }
 
-    public void addNewTag(String name) {
-    	tagList.add(name);
+    public void addNewTag(String name, int categoryId) {
+    	tagList.add(name, categoryId);
     	listeners.firePropertyChange(PROP_TAGLIST, null, tagList);
     }
 
@@ -296,6 +296,14 @@ public class ApplicationContext {
 
     public List<Category> getCategoryList(){
         return categoryList;
+    }
+
+    public void addCategoryList(String name) {
+    	Category category = new Category();
+    	category.name = name;
+    	category.id = categoryList.size();
+    	category.order = 0;
+    	categoryList.add(category);
     }
 
     public List<Integer> filterTagList = new ArrayList<Integer>();

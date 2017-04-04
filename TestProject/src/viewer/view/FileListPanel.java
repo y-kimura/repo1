@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -31,19 +29,19 @@ import viewer.ApplicationControllerListener;
 import viewer.model.Item;
 
 public class FileListPanel extends JPanel {
-	
+
 	private static final long serialVersionUID = 1L;
 	private JList jList;
 	private ApplicationContext context;
 	private ApplicationController controller;
-    
+
 	private DefaultListModel listModel;
-	
+
 	public FileListPanel(final ApplicationContext context, final ApplicationController controller){
         this.context = context;
         this.controller = controller;
         setLayout(new BorderLayout());
-		
+
 		listModel = new DefaultListModel();
 		for(Item item: context.filterItemList) {
 		    listModel.addElement(item);
@@ -54,14 +52,16 @@ public class FileListPanel extends JPanel {
 		jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		jList.setVisibleRowCount(0);
 		setPreferredSize(new Dimension(400, 240));
-		
+
 		jList.addMouseListener(new ListMouseListener());
 		jList.addKeyListener(new ListKeyListener());
 		jList.addListSelectionListener(new ListSelectionListener() {
            public void valueChanged( ListSelectionEvent e ){
                 if( !e.getValueIsAdjusting() ){
+                	context.selectIndex = jList.getSelectedIndex();
                     controller.fireSelectedIndexChanged((Item)jList.getSelectedValue());
                 } else {
+                	context.selectIndex = -1;
                 	controller.fireSelectedIndexChanged(null);
                 }
             }
@@ -79,12 +79,12 @@ public class FileListPanel extends JPanel {
         		return label;
         	}
         });
-        
+
         this.controller.addListener(new ApplicationControllerListener() {
             public void selectedIndexChanged(Item item ){
             }
         });
-        
+
         this.context.addItemListChangeListener(new PropertyChangeListener() {
             public void propertyChange( PropertyChangeEvent evt ){
         		listModel = new DefaultListModel();
@@ -94,13 +94,13 @@ public class FileListPanel extends JPanel {
             	jList.setModel(listModel);
             }
         });
-        
+
         JScrollPane sp = new JScrollPane(jList);
         this.add(sp, BorderLayout.CENTER);
 	}
-	
+
 	/**
-	 * JListópÇÃÉLÅ[ÉäÉXÉiÅ[
+	 * JListÔøΩpÔøΩÃÉLÔøΩ[ÔøΩÔøΩÔøΩXÔøΩiÔøΩ[
 	 */
 	class ListKeyListener extends KeyAdapter {
 		@Override
@@ -113,7 +113,7 @@ public class FileListPanel extends JPanel {
 	}
 
 	/**
-	 * JListópÇÃÉ}ÉEÉXÉäÉXÉiÅ[
+	 * JListÔøΩpÔøΩÃÉ}ÔøΩEÔøΩXÔøΩÔøΩÔøΩXÔøΩiÔøΩ[
 	 */
 	class ListMouseListener extends MouseAdapter {
 		@Override
@@ -124,7 +124,7 @@ public class FileListPanel extends JPanel {
 			}
 		}
 	}
-	
+
 	private void playItem(int index) {
 		File f = context.filterItemList.get(index).file;
 		if (!Desktop.isDesktopSupported()) {
