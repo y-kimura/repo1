@@ -1,5 +1,5 @@
 /*** Eclipse Class Decompiler plugin, copyright (c) 2012 Chao Chen (cnfree2000@hotmail.com) ***/
-package main.java.createThumb;
+package createThumb;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

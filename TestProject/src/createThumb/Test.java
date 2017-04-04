@@ -1,4 +1,4 @@
-package main.java.createThumb;
+package createThumb;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
