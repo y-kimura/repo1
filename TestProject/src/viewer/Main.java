@@ -18,7 +18,7 @@ public class Main {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-			ApplicationContext context = new ApplicationContext(new File("conf.properties"));
+			ApplicationContext context = new ApplicationContext(new File("data\\conf.properties"));
 
 			MainWindow window = new MainWindow(context);
 			window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

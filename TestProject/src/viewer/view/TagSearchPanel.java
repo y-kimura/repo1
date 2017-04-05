@@ -15,6 +15,7 @@ import javax.swing.tree.DefaultTreeModel;
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.model.Category;
+import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagList;
 import viewer.model.TagTreeNode;
@@ -74,11 +75,11 @@ public class TagSearchPanel extends JPanel {
 		root.setUserObject(new TagTreeNode(rootCate, null));
 		for (Category category: context.getCategoryList()) {
 			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name);
-			tmpCate.setUserObject(new TagTreeNode(category, item));
+			tmpCate.setUserObject(new TagTreeNode(category, new Item()));
 			for (Tag tag: context.getTagList().tagList) {
 				if (tag.categoryId == category.id) {
 					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name);
-					tmpTag.setUserObject(new TagTreeNode(tag, item));
+					tmpTag.setUserObject(new TagTreeNode(tag, new Item()));
 					tmpCate.add(tmpTag);
 				}
 			}

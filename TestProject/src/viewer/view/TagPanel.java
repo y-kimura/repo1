@@ -77,16 +77,16 @@ public class TagPanel extends JPanel {
 	}
 
 	private DefaultTreeModel createTagTreeModel(Item item) {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
 		Category rootCate = new Category();
 		rootCate.name = "root";
 		root.setUserObject(new TagTreeNode(rootCate, null));
 		for (Category category: context.getCategoryList()) {
-			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name);
+			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name, true);
 			tmpCate.setUserObject(new TagTreeNode(category, item));
 			for (Tag tag: context.getTagList().tagList) {
 				if (tag.categoryId == category.id) {
-					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name);
+					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name, false);
 					tmpTag.setUserObject(new TagTreeNode(tag, item));
 					tmpCate.add(tmpTag);
 				}

@@ -34,6 +34,10 @@ public class ApplicationContext {
 	public static final String SMB_DIR = "d:\\testtest\\ss";
 	public static final String MOVIE_DIR = "d:\\testtest";
 
+	public static final String TAGLIST_FILE = "data\\TAGLIST.dat";
+	public static final String CATEGORYLIST_FILE = "data\\CATEGORYLIST.dat";
+	public static final String ITEMLIST_FILE = "data\\ITEMLIST.dat";
+
 
 	private PropertyChangeSupport listeners;
 	private Properties props;
@@ -144,7 +148,7 @@ public class ApplicationContext {
 
     protected void initializeItemList(){
 
-        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("ITEMLIST.dat"));
+        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File(ITEMLIST_FILE));
         for( PropertyReader pr: reader ){
         	Item item = new Item();
         	item.name = pr.stringValue("NAME", "<no-name>");
@@ -190,7 +194,7 @@ public class ApplicationContext {
         if(!itemFullMap.isEmpty()){
             List<Item> beans = new ArrayList<Item>();
             beans.addAll(itemFullMap.values());
-            IOUtils.writeIterableToPropertiesFile(beans, new File("ITEMLIST.dat"), new PropertyBuilder<Item>() {
+            IOUtils.writeIterableToPropertiesFile(beans, new File(ITEMLIST_FILE), new PropertyBuilder<Item>() {
                 public void build( Item bean, PropertyWriter out ){
                     out.set("NAME", bean.name);
                     String tagString = "";
@@ -226,7 +230,7 @@ public class ApplicationContext {
 
     private TagList tagList = new TagList();
     protected void initializeItemTagSet(){
-        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("TAGLIST.dat"));
+        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File(TAGLIST_FILE));
         for( PropertyReader pr: reader ){
         	Tag tag = new Tag();
         	tag.id = pr.intValue("ID", 0);
@@ -238,7 +242,7 @@ public class ApplicationContext {
     }
     protected void finalizeItemTagSet(){
         if(!tagList.tagList.isEmpty()){
-            IOUtils.writeIterableToPropertiesFile(tagList.tagList, new File("TAGLIST.dat"), new PropertyBuilder<Tag>() {
+            IOUtils.writeIterableToPropertiesFile(tagList.tagList, new File(TAGLIST_FILE), new PropertyBuilder<Tag>() {
                 public void build( Tag bean, PropertyWriter out ){
                     out.set("ID", bean.id);
                     out.set("NAME", bean.name);
@@ -266,7 +270,7 @@ public class ApplicationContext {
 
     private List<Category> categoryList = new ArrayList<Category>();
     protected void initializeCategoryList(){
-        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File("CATEGORYLIST.dat"));
+        Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File(CATEGORYLIST_FILE));
         for( PropertyReader pr: reader ){
         	Category category = new Category();
         	category.id = pr.intValue("ID", 0);
@@ -284,7 +288,7 @@ public class ApplicationContext {
     }
     protected void finalizeCategoryList(){
         if(!tagList.tagList.isEmpty()){
-            IOUtils.writeIterableToPropertiesFile(categoryList, new File("CATEGORYLIST.dat"), new PropertyBuilder<Category>() {
+            IOUtils.writeIterableToPropertiesFile(categoryList, new File(CATEGORYLIST_FILE), new PropertyBuilder<Category>() {
                 public void build( Category bean, PropertyWriter out ){
                     out.set("ID", bean.id);
                     out.set("NAME", bean.name);
