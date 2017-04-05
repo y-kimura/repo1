@@ -31,8 +31,6 @@ public class ApplicationContext {
 	public static final String PROP_TAGLIST = "TagList";
 	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
-	public static final String SMB_DIR = "d:\\testtest\\ss";
-	public static final String MOVIE_DIR = "d:\\testtest";
 
 	public static final String TAGLIST_FILE = "data\\TAGLIST.dat";
 	public static final String CATEGORYLIST_FILE = "data\\CATEGORYLIST.dat";
@@ -42,6 +40,9 @@ public class ApplicationContext {
 	private PropertyChangeSupport listeners;
 	private Properties props;
 	private File file;
+
+	private String movieDir;
+	private String smbDir;
 
 	public int selectIndex = -1;
 
@@ -148,6 +149,9 @@ public class ApplicationContext {
 
     protected void initializeItemList(){
 
+    	movieDir = PropertiesUtils.stringValue(props, "movieDirPath", "d:\\testtest");
+    	smbDir = PropertiesUtils.stringValue(props, "smbDirPath", "d:\\testtest\\ss");
+
         Iterable<PropertyReader> reader = IOUtils.createPropertyReaderIterable(new File(ITEMLIST_FILE));
         for( PropertyReader pr: reader ){
         	Item item = new Item();
@@ -162,7 +166,7 @@ public class ApplicationContext {
         	itemFullMap.put(item.name, item);
         }
 
-		File[] files = new File(MOVIE_DIR).listFiles();
+		File[] files = new File(movieDir).listFiles();
 		for (File file : files) {
 			if (file.isDirectory()) {
 				continue;
@@ -191,6 +195,10 @@ public class ApplicationContext {
     }
 
     protected void finalizeItemList(){
+    	PropertiesUtils.set(props, "movieDirPath", movieDir);
+    	PropertiesUtils.set(props, "smbDirPath", smbDir);
+
+
         if(!itemFullMap.isEmpty()){
             List<Item> beans = new ArrayList<Item>();
             beans.addAll(itemFullMap.values());
