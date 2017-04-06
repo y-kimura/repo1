@@ -47,6 +47,7 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 				setCellEditor(null);
 				super.updateUI();
 				setCellRenderer(new TagSearchTreeCellRenderer());
+				setCellEditor(null);
 //				setCellEditor(new TagTreeCellEditor());
 			}
 		};
@@ -90,18 +91,18 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		TagSearchTreeNode selectedNode = (TagSearchTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
-		if (selectedNode.tagFlag) {
-			selectedNode.selected = !selectedNode.selected;
-			if (selectedNode.selected) {
-				filterTagList.add(selectedNode.tagId);
-			} else {
-				filterTagList.remove(selectedNode.tagId);
+		if (tree.getLastSelectedPathComponent() != null) {
+			TagSearchTreeNode selectedNode = (TagSearchTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
+			if (selectedNode.tagFlag) {
+				selectedNode.selected = !selectedNode.selected;
+				if (selectedNode.selected) {
+					filterTagList.add(selectedNode.tagId);
+				} else {
+					filterTagList.remove((Integer)selectedNode.tagId);
+				}
+				((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
 			}
-			((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
+			tree.clearSelection();
 		}
-
 	}
-
-
 }

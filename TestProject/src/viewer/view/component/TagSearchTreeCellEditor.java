@@ -18,7 +18,7 @@ import viewer.model.TagTreeNode;
 
 //delegation pattern
 public class TagSearchTreeCellEditor extends AbstractCellEditor implements TreeCellEditor {
-		private TagTreeNode checkBoxNode;
+		private TagSearchTreeNode checkBoxNode;
 		private final JCheckBox checkBox = new JCheckBox() {
 			private transient ActionListener handler;
 			@Override public void updateUI() {
