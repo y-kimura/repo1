@@ -9,20 +9,20 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.model.Category;
-import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagList;
-import viewer.model.TagTreeNode;
-import viewer.view.component.TagTreeCellEditor;
-import viewer.view.component.TagTreeCellRenderer;
+import viewer.model.TagSearchTreeNode;
+import viewer.view.component.TagSearchTreeCellRenderer;
 
-public class TagSearchPanel extends JPanel {
+public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 
 	private static final long serialVersionUID = 1L;
 	private ApplicationContext context;
@@ -46,8 +46,8 @@ public class TagSearchPanel extends JPanel {
 				setCellRenderer(null);
 				setCellEditor(null);
 				super.updateUI();
-				setCellRenderer(new TagTreeCellRenderer());
-				setCellEditor(new TagTreeCellEditor());
+				setCellRenderer(new TagSearchTreeCellRenderer());
+//				setCellEditor(new TagTreeCellEditor());
 			}
 		};
 		for (int i = 0; i < tree.getRowCount(); i++) {
@@ -56,6 +56,8 @@ public class TagSearchPanel extends JPanel {
 
 		tree.setEditable(true);
 		tree.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+		tree.addTreeSelectionListener(this);
 
 		add(new JScrollPane(tree));
 
@@ -69,23 +71,36 @@ public class TagSearchPanel extends JPanel {
     }
 
 	private DefaultTreeModel createTagTreeModel() {
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
-		Category rootCate = new Category();
-		rootCate.name = "root";
-		root.setUserObject(new TagTreeNode(rootCate, null));
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
+		root.setUserObject(new TagSearchTreeNode("root", -1, false, false));
 		for (Category category: context.getCategoryList()) {
-			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name);
-			tmpCate.setUserObject(new TagTreeNode(category, new Item()));
+			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name, true);
+			tmpCate.setUserObject(new TagSearchTreeNode(category.name, category.id, false, false));
 			for (Tag tag: context.getTagList().tagList) {
 				if (tag.categoryId == category.id) {
-					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name);
-					tmpTag.setUserObject(new TagTreeNode(tag, new Item()));
+					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name, false);
+					tmpTag.setUserObject(new TagSearchTreeNode(tag.name, tag.id, true, filterTagList.contains(tag.id)));
 					tmpCate.add(tmpTag);
 				}
 			}
 			root.add(tmpCate);
 		}
 		return new DefaultTreeModel(root);
+	}
+
+	@Override
+	public void valueChanged(TreeSelectionEvent e) {
+		TagSearchTreeNode selectedNode = (TagSearchTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
+		if (selectedNode.tagFlag) {
+			selectedNode.selected = !selectedNode.selected;
+			if (selectedNode.selected) {
+				filterTagList.add(selectedNode.tagId);
+			} else {
+				filterTagList.remove(selectedNode.tagId);
+			}
+			((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
+		}
+
 	}
 
 
