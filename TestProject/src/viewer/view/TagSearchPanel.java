@@ -1,7 +1,9 @@
 package viewer.view;
 
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -12,13 +14,14 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.model.Category;
 import viewer.model.Tag;
-import viewer.model.TagList;
 import viewer.model.TagSearchTreeNode;
 import viewer.view.component.TagSearchTreeCellRenderer;
 
@@ -26,18 +29,12 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 
 	private static final long serialVersionUID = 1L;
 	private ApplicationContext context;
-    private ApplicationController controller;
-    private TagList tagList;
     private List<Integer> filterTagList;
 	private JTree tree;
-
-//    private List<SelectionListener> listeners;
 
     public TagSearchPanel(ApplicationContext context, final ApplicationController controller){
     	this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.context = context;
-        this.controller = controller;
-        this.tagList = context.getTagList();
         this.filterTagList = context.filterTagList;
 
 		tree = new JTree(createTagTreeModel()) {
@@ -47,8 +44,11 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 				setCellEditor(null);
 				super.updateUI();
 				setCellRenderer(new TagSearchTreeCellRenderer());
-				setCellEditor(null);
-//				setCellEditor(new TagTreeCellEditor());
+				setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()) {
+		            @Override public boolean isCellEditable(EventObject e) {
+		                return !(e instanceof MouseEvent) && super.isCellEditable(e);
+		            }
+		        });
 			}
 		};
 		for (int i = 0; i < tree.getRowCount(); i++) {
@@ -101,6 +101,7 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 					filterTagList.remove((Integer)selectedNode.tagId);
 				}
 				((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
+				context.filterItemList();
 			}
 			tree.clearSelection();
 		}
