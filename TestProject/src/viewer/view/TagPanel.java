@@ -1,6 +1,8 @@
 package viewer.view;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -12,7 +14,11 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import viewer.ApplicationContext;
@@ -22,11 +28,10 @@ import viewer.model.Category;
 import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagTreeNode;
-import viewer.view.component.TagTreeCellEditor;
 import viewer.view.component.TagTreeCellRenderer;
 import viewer.view.component.TagTreePopupMenu;
 
-public class TagPanel extends JPanel {
+public class TagPanel extends JPanel implements TreeSelectionListener{
 
 	private static final long serialVersionUID = 1L;
 	private ApplicationContext context;
@@ -41,14 +46,18 @@ public class TagPanel extends JPanel {
 		this.context = context;
 		this.controller = controller;
 
-		tree = new JTree(createTagTreeModel(new Item())) {
+		tree = new JTree(createTagTreeModel()) {
 			@Override
 			public void updateUI() {
 				setCellRenderer(null);
 				setCellEditor(null);
 				super.updateUI();
 				setCellRenderer(new TagTreeCellRenderer());
-				setCellEditor(new TagTreeCellEditor());
+				setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()) {
+		            @Override public boolean isCellEditable(EventObject e) {
+		                return !(e instanceof MouseEvent) && super.isCellEditable(e);
+		            }
+		        });
 			}
 		};
 		for (int i = 0; i < tree.getRowCount(); i++) {
@@ -60,15 +69,13 @@ public class TagPanel extends JPanel {
 
 		tree.setComponentPopupMenu(createTagTreePopup());
 
+		tree.addTreeSelectionListener(this);
+
 		add(new JScrollPane(tree));
 
 		this.controller.addListener(new ApplicationControllerListener() {
 			public void selectedIndexChanged(Item item){
-				if (item != null) {
-					tree.setModel(createTagTreeModel(item));
-				} else {
-					tree.setModel(createTagTreeModel(new Item()));
-				}
+				tree.setModel(createTagTreeModel());
 				for (int i = 0; i < tree.getRowCount(); i++) {
 					tree.expandRow(i);
 				}
@@ -76,18 +83,20 @@ public class TagPanel extends JPanel {
 		});
 	}
 
-	private DefaultTreeModel createTagTreeModel(Item item) {
+	private DefaultTreeModel createTagTreeModel() {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
-		Category rootCate = new Category();
-		rootCate.name = "root";
-		root.setUserObject(new TagTreeNode(rootCate, null));
+		root.setUserObject(new TagTreeNode("root", -1, false, false));
 		for (Category category: context.getCategoryList()) {
 			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name, true);
-			tmpCate.setUserObject(new TagTreeNode(category, item));
+			tmpCate.setUserObject(new TagTreeNode(category.name, category.id, false, false));
 			for (Tag tag: context.getTagList().tagList) {
 				if (tag.categoryId == category.id) {
 					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name, false);
-					tmpTag.setUserObject(new TagTreeNode(tag, item));
+					if (context.selectIndex < 0) {
+						tmpTag.setUserObject(new TagTreeNode(tag.name, tag.id, true, false));
+					} else {
+						tmpTag.setUserObject(new TagTreeNode(tag.name, tag.id, true, context.filterItemList.get(context.selectIndex).isSelectedTag(tag.id)));
+					}
 					tmpCate.add(tmpTag);
 				}
 			}
@@ -123,22 +132,22 @@ public class TagPanel extends JPanel {
 					}
 					textField.setText("");
 					String dialogTitle = "";
-					if (tagTreeNode.getName().equals("root")) {
+					if (tagTreeNode.name.equals("root")) {
 						dialogTitle = "add Category";
 					} else {
 						dialogTitle = "add Tag";
 					}
 					int result = JOptionPane.showConfirmDialog(tree, textField, dialogTitle, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 					if (result == JOptionPane.OK_OPTION) {
-						if (tagTreeNode.getName().equals("root")) {
+						if (tagTreeNode.name.equals("root")) {
 							context.addCategoryList(textField.getText());
 						} else {
-							context.getTagList().add(textField.getText(), tagTreeNode.category.id);
+							context.getTagList().add(textField.getText(), tagTreeNode.tagId);
 						}
 						if (context.selectIndex < 0) {
-							tree.setModel(createTagTreeModel(new Item()));
+							tree.setModel(createTagTreeModel());
 						} else {
-							tree.setModel(createTagTreeModel(context.filterItemList.get(context.selectIndex)));
+							tree.setModel(createTagTreeModel());
 						}
 						for (int i = 0; i < tree.getRowCount(); i++) {
 							tree.expandRow(i);
@@ -168,13 +177,13 @@ public class TagPanel extends JPanel {
 				Object node = jpopup.getPath().getLastPathComponent();
 				if (node instanceof DefaultMutableTreeNode) {
 					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
-					textField.setText(tagTreeNode.getName());
+					textField.setText(tagTreeNode.name);
 					int result = JOptionPane.showConfirmDialog(tree, textField, "edit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 					if (result == JOptionPane.OK_OPTION) {
 						String str = textField.getText();
 						if (!str.trim().isEmpty()) {
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-							tagTreeNode.setName(str);
+							tagTreeNode.name = str;
 							model.valueForPathChanged(jpopup.getPath(), tagTreeNode);
 						}
 					}
@@ -194,5 +203,22 @@ public class TagPanel extends JPanel {
 //	};
 
 		return jpopup;
+	}
+
+	@Override
+	public void valueChanged(TreeSelectionEvent e) {
+		if (tree.getLastSelectedPathComponent() != null && context.selectIndex >= 0) {
+			TagTreeNode selectedNode = (TagTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
+			if (selectedNode.tagFlag) {
+				selectedNode.selected = !selectedNode.selected;
+				if (selectedNode.selected) {
+					context.filterItemList.get(context.selectIndex).tags.add(selectedNode.tagId);
+				} else {
+					context.filterItemList.get(context.selectIndex).tags.remove(selectedNode.tagId);
+				}
+				((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
+			}
+			tree.clearSelection();
+		}
 	}
 }

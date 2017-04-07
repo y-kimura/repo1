@@ -22,8 +22,8 @@ import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.model.Category;
 import viewer.model.Tag;
-import viewer.model.TagSearchTreeNode;
-import viewer.view.component.TagSearchTreeCellRenderer;
+import viewer.model.TagTreeNode;
+import viewer.view.component.TagTreeCellRenderer;
 
 public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 
@@ -43,7 +43,7 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 				setCellRenderer(null);
 				setCellEditor(null);
 				super.updateUI();
-				setCellRenderer(new TagSearchTreeCellRenderer());
+				setCellRenderer(new TagTreeCellRenderer());
 				setCellEditor(new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer()) {
 		            @Override public boolean isCellEditable(EventObject e) {
 		                return !(e instanceof MouseEvent) && super.isCellEditable(e);
@@ -73,14 +73,14 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 
 	private DefaultTreeModel createTagTreeModel() {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root", true);
-		root.setUserObject(new TagSearchTreeNode("root", -1, false, false));
+		root.setUserObject(new TagTreeNode("root", -1, false, false));
 		for (Category category: context.getCategoryList()) {
 			DefaultMutableTreeNode tmpCate = new DefaultMutableTreeNode(category.name, true);
-			tmpCate.setUserObject(new TagSearchTreeNode(category.name, category.id, false, false));
+			tmpCate.setUserObject(new TagTreeNode(category.name, category.id, false, false));
 			for (Tag tag: context.getTagList().tagList) {
 				if (tag.categoryId == category.id) {
 					DefaultMutableTreeNode tmpTag = new DefaultMutableTreeNode(tag.name, false);
-					tmpTag.setUserObject(new TagSearchTreeNode(tag.name, tag.id, true, filterTagList.contains(tag.id)));
+					tmpTag.setUserObject(new TagTreeNode(tag.name, tag.id, true, filterTagList.contains(tag.id)));
 					tmpCate.add(tmpTag);
 				}
 			}
@@ -92,7 +92,7 @@ public class TagSearchPanel extends JPanel implements TreeSelectionListener{
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
 		if (tree.getLastSelectedPathComponent() != null) {
-			TagSearchTreeNode selectedNode = (TagSearchTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
+			TagTreeNode selectedNode = (TagTreeNode)((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject();
 			if (selectedNode.tagFlag) {
 				selectedNode.selected = !selectedNode.selected;
 				if (selectedNode.selected) {

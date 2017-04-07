@@ -21,10 +21,10 @@ public class TagTreeCellRenderer implements TreeCellRenderer {
 			checkBox.setFont(tree.getFont());
 			checkBox.setOpaque(false);
 			checkBox.setFocusable(false);
-			checkBox.setText(node.tag.name);
-			checkBox.setSelected(node.item.isSelectedTag(node.tag.id));
+			checkBox.setText(node.name);
+			checkBox.setSelected(node.selected);
 			return checkBox;
 		}
-		return renderer.getTreeCellRendererComponent(tree, node.getName(), selected, expanded, leaf, row, hasFocus);
+		return renderer.getTreeCellRendererComponent(tree, node.name, selected, expanded, leaf, row, hasFocus);
 	}
 }
