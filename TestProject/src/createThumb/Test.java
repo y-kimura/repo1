@@ -15,8 +15,8 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
 public class Test extends MediaListenerAdapter {
-	private static String INPUT_DIR = "E:\\test\\";
-	private static String OUTPUT_DIR = "E:\\test\\ss";
+	private static String INPUT_DIR = "E:\\new";
+	private static String OUTPUT_DIR = "E:\\new\\ss";
 
 	String[] suffixArray = {"wmv","mp4","flv"};
 
@@ -62,7 +62,7 @@ public class Test extends MediaListenerAdapter {
 					return;
 				}
 			}
-			BufferedImage sumbImage = reSize3(event.getImage(), 50,50);
+			BufferedImage sumbImage = reSize3(event.getImage(), 90,75);
 //			File outputFile = File.createFile("frame", ".png", new File(OUTPUT_DIR));
 			File outputFile = new File(OUTPUT_DIR, "_smb_".concat(files[fileIndex].getName()).concat(".png"));
 
