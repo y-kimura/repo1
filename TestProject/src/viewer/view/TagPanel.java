@@ -7,7 +7,6 @@ import java.util.EventObject;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -145,11 +144,7 @@ public class TagPanel extends JPanel implements TreeSelectionListener{
 						} else {
 							context.getTagList().add(textField.getText(), tagTreeNode.tagId);
 						}
-						if (context.selectIndex < 0) {
-							tree.setModel(createTagTreeModel());
-						} else {
-							tree.setModel(createTagTreeModel());
-						}
+						tree.setModel(createTagTreeModel());
 						for (int i = 0; i < tree.getRowCount(); i++) {
 							tree.expandRow(i);
 						}
@@ -183,51 +178,74 @@ public class TagPanel extends JPanel implements TreeSelectionListener{
 					if (result == JOptionPane.OK_OPTION) {
 						String str = textField.getText();
 						if (!str.trim().isEmpty()) {
-							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+							if (tagTreeNode.tagFlag) {
+								for (Tag tag: context.getTagList().tagList) {
+									if (tag.id == tagTreeNode.tagId) {
+										tag.name = str;
+									}
+								}
+							} else {
+								for (Category cate: context.getCategoryList()) {
+									if (cate.id == tagTreeNode.tagId) {
+										cate.name = str;
+									}
+								}
+							}
 							tagTreeNode.name = str;
-							model.valueForPathChanged(jpopup.getPath(), tagTreeNode);
+							((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) node);
 						}
 					}
 				}
 			}
 		});
 
-		jpopup.add(new AbstractAction("move") {
-			protected JComboBox<String> categoryComboBox = new JComboBox<String>();
-			protected final JTextField textField = new JTextField(24) {
-				protected transient AncestorListener listener;
-				@Override public void updateUI() {
-					removeAncestorListener(listener);
-					super.updateUI();
-					listener = new AncestorListener() {
-						@Override public void ancestorAdded(AncestorEvent e) {
-							requestFocusInWindow();
-						}
-						@Override public void ancestorMoved(AncestorEvent e)   { /* not needed */ }
-						@Override public void ancestorRemoved(AncestorEvent e) { /* not needed */ }
-					};
-					addAncestorListener(listener);
-				}
-			};
-			@Override public void actionPerformed(ActionEvent e) {
-				for (Category cate: context.getCategoryList()) {
-					categoryComboBox.addItem(cate.name);
-				}
-				Object node = jpopup.getPath().getLastPathComponent();
-				if (node instanceof DefaultMutableTreeNode) {
-					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
-					int result = JOptionPane.showConfirmDialog(tree, categoryComboBox, "edit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-					if (result == JOptionPane.OK_OPTION) {
-						String str = textField.getText();
-						if (!str.trim().isEmpty()) {
-							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
-							tagTreeNode.name = str;
-							model.valueForPathChanged(jpopup.getPath(), tagTreeNode);
-						}
-					}
-				}
-			}
-		});
+//		jpopup.add(new AbstractAction("move") {
+//			protected JComboBox<String> categoryComboBox = new JComboBox<String>();
+//			protected final JTextField textField = new JTextField(24) {
+//				protected transient AncestorListener listener;
+//				@Override public void updateUI() {
+//					removeAncestorListener(listener);
+//					super.updateUI();
+//					listener = new AncestorListener() {
+//						@Override public void ancestorAdded(AncestorEvent e) {
+//							requestFocusInWindow();
+//						}
+//						@Override public void ancestorMoved(AncestorEvent e)   { /* not needed */ }
+//						@Override public void ancestorRemoved(AncestorEvent e) { /* not needed */ }
+//					};
+//					addAncestorListener(listener);
+//				}
+//			};
+//			@Override public void actionPerformed(ActionEvent e) {
+//				for (Category cate: context.getCategoryList()) {
+//					categoryComboBox.addItem(cate.name);
+//				}
+//				Object node = jpopup.getPath().getLastPathComponent();
+//				if (node instanceof DefaultMutableTreeNode) {
+//					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
+//					int result = JOptionPane.showConfirmDialog(tree, categoryComboBox, "edit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+//					if (result == JOptionPane.OK_OPTION) {
+//						String str = textField.getText();
+//						if (!str.trim().isEmpty()) {
+//							if (tagTreeNode.tagFlag) {
+//								for (Tag tag: context.getTagList().tagList) {
+//									if (tag.id == tagTreeNode.tagId) {
+//										tag.name = str;
+//									}
+//								}
+//							} else {
+//								for (Category cate: context.getCategoryList()) {
+//									if (cate.id == tagTreeNode.tagId) {
+//										cate.name = str;
+//									}
+//								}
+//							}
+//							((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) node);
+//						}
+//					}
+//				}
+//			}
+//		});
 //		private final Action removeNodeAction = new AbstractAction("remove") {
 //		@Override public void actionPerformed(ActionEvent e) {
 //			DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();

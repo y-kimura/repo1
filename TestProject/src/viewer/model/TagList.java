@@ -14,9 +14,14 @@ public class TagList {
 	}
 
 	public void add(String name, int categoryId) {
-		int size = tagList.size();
+		int maxId = 0;
 		Tag tag = new Tag();
-		tag.id = size;
+    	for (Tag tag2: tagList) {
+    		if (tag2.id > maxId) {
+    			maxId = tag2.id;
+    		}
+    	}
+		tag.id = maxId;
 		tag.name = name;
 		tag.categoryId = categoryId;
 		tagList.add(tag);

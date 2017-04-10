@@ -320,7 +320,13 @@ public class ApplicationContext {
     public void addCategoryList(String name) {
     	Category category = new Category();
     	category.name = name;
-    	category.id = categoryList.size();
+    	int maxId = 0;
+    	for (Category cate: categoryList) {
+    		if (cate.id > maxId) {
+    			maxId = cate.id;
+    		}
+    	}
+    	category.id = maxId + 1;
     	category.order = 0;
     	categoryList.add(category);
     }
