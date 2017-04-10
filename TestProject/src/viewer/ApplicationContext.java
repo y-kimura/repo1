@@ -20,6 +20,7 @@ import viewer.model.Category;
 import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagList;
+import viewer.util.CreateThumbUtils;
 import viewer.util.IOUtils;
 import viewer.util.PropertiesUtils;
 import viewer.util.PropertyBuilder;
@@ -191,10 +192,17 @@ public class ApplicationContext {
 			}
 		}
 
+
 		Map<String, Item> tmpItemFullMap = new HashMap<String, Item>(itemFullMap);
 		for (Item item: tmpItemFullMap.values()) {
 			if (item.file == null || !item.file.exists()) {
 				itemFullMap.remove(item.name);
+				continue;
+			}
+
+			if (!new File(smbDir + "\\"+ item.getThumbName()).exists()) {
+				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
+				createThumbUtils.createThumb(item.file, smbDir + "\\"+ item.getThumbName());
 			}
 		}
 		sortItemList();
