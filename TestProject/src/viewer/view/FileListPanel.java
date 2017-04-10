@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -31,12 +32,14 @@ import viewer.model.Item;
 public class FileListPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+
 	private JList jList;
 	private ApplicationContext context;
 	private ApplicationController controller;
 
 	private DefaultListModel listModel;
 
+	@SuppressWarnings("unchecked")
 	public FileListPanel(final ApplicationContext context, final ApplicationController controller){
         this.context = context;
         this.controller = controller;
@@ -47,7 +50,7 @@ public class FileListPanel extends JPanel {
 		    listModel.addElement(item);
 		}
 		jList = new JList(listModel);
-		jList.setFixedCellHeight(110);
+		jList.setFixedCellHeight(100);
 		jList.setFixedCellWidth(90);
 		jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		jList.setVisibleRowCount(0);
@@ -75,7 +78,7 @@ public class FileListPanel extends JPanel {
                 label.setText(item.getName());
                 label.setVerticalTextPosition(SwingConstants.BOTTOM);
                 label.setHorizontalTextPosition(SwingConstants.CENTER);
-//                label.setIcon(new ImageIcon(ApplicationContext.SMB_DIR + "\\"+ item.getThumbName()));
+                label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
         		return label;
         	}
         });

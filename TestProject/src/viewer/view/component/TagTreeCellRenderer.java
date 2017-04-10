@@ -1,5 +1,6 @@
 package viewer.view.component;
 
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JCheckBox;
@@ -19,10 +20,16 @@ public class TagTreeCellRenderer implements TreeCellRenderer {
 		if (node.tagFlag) {
 			checkBox.setEnabled(tree.isEnabled());
 			checkBox.setFont(tree.getFont());
-			checkBox.setOpaque(false);
+			checkBox.setOpaque(true);
 			checkBox.setFocusable(false);
 			checkBox.setText(node.name);
 			checkBox.setSelected(node.selected);
+			if (node.selected) {
+				checkBox.setOpaque(true);
+				checkBox.setBackground(Color.YELLOW);
+			} else {
+				checkBox.setOpaque(false);
+			}
 			return checkBox;
 		}
 		return renderer.getTreeCellRendererComponent(tree, node.name, selected, expanded, leaf, row, hasFocus);

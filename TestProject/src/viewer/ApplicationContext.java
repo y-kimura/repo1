@@ -6,11 +6,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import viewer.model.Category;
 import viewer.model.Item;
@@ -24,6 +28,8 @@ import viewer.util.PropertyWriter;
 import viewer.view.conf.WindowConfig;
 
 public class ApplicationContext {
+
+	private static final Logger log = LoggerFactory.getLogger(ApplicationContext.class);
 
 	public static final String PROP_MAINWINDOW = "MainWindow";
 	public static final String PROP_TAGSEARCHWINDOW = "TagSearchWindow";
@@ -41,8 +47,8 @@ public class ApplicationContext {
 	private Properties props;
 	private File file;
 
-	private String movieDir;
-	private String smbDir;
+	public String movieDir;
+	public String smbDir;
 
 	public int selectIndex = -1;
 
@@ -98,7 +104,7 @@ public class ApplicationContext {
 
     public Map<String, Item> itemFullMap = new HashMap<String, Item>();
     public List<Item> filterItemList = new ArrayList<Item>();
-    public List<Item> sortItemFullList = new ArrayList<Item>();
+    public ArrayList<Item> sortItemFullList = new ArrayList<Item>();
 
     public void filterItemList() {
 		filterItemList = new ArrayList<Item>();
@@ -141,8 +147,9 @@ public class ApplicationContext {
     	}
     	Collections.sort(sortItemFullList,new Comparator<Item>(){
     		public int compare(Item i1,Item i2){
-
-    			return (int)(i2.file.lastModified()-i1.file.lastModified());
+    			Date date1 = new Date(i1.getFile().lastModified());
+    			Date date2 = new Date(i2.getFile().lastModified());
+    			return date1.compareTo(date2);
     		}
     	});
     }
