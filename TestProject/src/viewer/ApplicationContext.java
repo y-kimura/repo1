@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -158,6 +159,8 @@ public class ApplicationContext {
 
     protected void initializeItemList(){
 
+    	String[] suffixArray = {"wmv","mp4","flv"};
+
     	movieDir = PropertiesUtils.stringValue(props, "movieDirPath", "d:\\testtest");
     	smbDir = PropertiesUtils.stringValue(props, "smbDirPath", "d:\\testtest\\ss");
 
@@ -165,6 +168,7 @@ public class ApplicationContext {
         for( PropertyReader pr: reader ){
         	Item item = new Item();
         	item.name = pr.stringValue("NAME", "<no-name>");
+        	item.thumbNumber = pr.intValue("TNUM", 1);
         	String tagString = pr.stringValue("TAGS", "");
         	item.tags = new HashSet<Integer>();
         	if (tagString != null && !tagString.isEmpty()) {
@@ -180,14 +184,16 @@ public class ApplicationContext {
 			if (file.isDirectory()) {
 				continue;
 			}
+			if (!Arrays.asList(suffixArray).contains(getSuffix(file.getName()))) {
+				continue;
+			}
 			Item item = itemFullMap.get(file.getName());
 			if (item != null) {
 				item.file = file;
-				item.thumbName = "_smb_".concat(file.getName()).concat(".png");
 			} else {
 				item = new Item();
 				item.name = file.getName();
-				item.thumbName = "_smb_".concat(file.getName()).concat(".png");
+				item.thumbNumber = 1;//"_smb1_".concat(file.getName()).concat(".png");
 				item.file = file;
 				itemFullMap.put(item.name, item);
 			}
@@ -201,14 +207,29 @@ public class ApplicationContext {
 				continue;
 			}
 
-			if (!new File(smbDir + "\\"+ item.getThumbName()).exists()) {
+			if (!new File(smbDir + "\\" + createThumbFileName(item.name, item.thumbNumber)).exists()) {
+				item.thumbNumber = 1;
 				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
-				createThumbUtils.createThumb(item.file, smbDir + "\\"+ item.getThumbName());
+				createThumbUtils.createThumb(item.file, smbDir + "\\"+ createThumbFileName(item.name, item.thumbNumber));
 			}
 		}
 		sortItemList();
 		filterItemList();
     }
+
+	private static String getSuffix(String fileName) {
+	    if (fileName == null)
+	        return null;
+	    int point = fileName.lastIndexOf(".");
+	    if (point != -1) {
+	        return fileName.substring(point + 1);
+	    }
+	    return fileName;
+	}
+
+	private static String createThumbFileName(String name, int thumbNumber) {
+		return "_smb" + thumbNumber + "_" + name + ".png";
+	}
 
     protected void finalizeItemList(){
     	PropertiesUtils.set(props, "movieDirPath", movieDir);
@@ -221,6 +242,7 @@ public class ApplicationContext {
             IOUtils.writeIterableToPropertiesFile(beans, new File(ITEMLIST_FILE), new PropertyBuilder<Item>() {
                 public void build( Item bean, PropertyWriter out ){
                     out.set("NAME", bean.name);
+                    out.set("TNUM", bean.thumbNumber);
                     String tagString = "";
                     for (int i: bean.tags) {
                     	tagString = tagString.concat(Integer.toString(i)).concat(",");
