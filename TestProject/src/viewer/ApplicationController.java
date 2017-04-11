@@ -10,8 +10,6 @@ public class ApplicationController {
     private ApplicationContext context;
     private List<ApplicationControllerListener> listeners = new ArrayList<ApplicationControllerListener>();
 
-    private int selectedImageIndex;
-
     public ApplicationController( ApplicationContext context ){
         this.context = context;
 //        this.context.addImageFileListChangeListener(new PropertyChangeListener() {

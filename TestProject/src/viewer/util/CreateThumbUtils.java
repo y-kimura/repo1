@@ -63,8 +63,7 @@ public class CreateThumbUtils extends MediaListenerAdapter {
 					return;
 				}
 			}
-			BufferedImage sumbImage = reSize3(event.getImage(), 90,75);
-//			File outputFile = File.createFile("frame", ".png", new File(OUTPUT_DIR));
+			BufferedImage sumbImage = reSize3(event.getImage(), 100, 80);
 			File outputFile = new File(OutputPath);
 
 			ImageIO.write(sumbImage, "png", outputFile);

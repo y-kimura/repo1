@@ -35,6 +35,7 @@ public class ApplicationContext {
 	public static final String PROP_MAINWINDOW = "MainWindow";
 	public static final String PROP_TAGSEARCHWINDOW = "TagSearchWindow";
 	public static final String PROP_ITEMLIST = "ItemList";
+	public static final String PROP_ITEMTAG = "ItemTag";
 	public static final String PROP_TAGLIST = "TagList";
 	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
@@ -44,7 +45,7 @@ public class ApplicationContext {
 	public static final String ITEMLIST_FILE = "data\\ITEMLIST.dat";
 
 
-	private PropertyChangeSupport listeners;
+	public PropertyChangeSupport listeners;
 	private Properties props;
 	private File file;
 
@@ -235,14 +236,6 @@ public class ApplicationContext {
         }
     }
 
-//    public void setItemList(ItemList list){
-//        ImageFileList old = this.viewList;
-//        this.modelList = list;
-//        this.viewList = build(list);
-//        listeners.firePropertyChange(PROP_IMAGEFILELIST, old, this.viewList);
-//        getHistory().add(list.getName(), list.getType(), list.getPath());
-//    }
-
     public void addItemListChangeListener(PropertyChangeListener listener){
         listeners.addPropertyChangeListener(PROP_ITEMLIST, listener);
     }
@@ -250,6 +243,9 @@ public class ApplicationContext {
         listeners.removePropertyChangeListener(PROP_ITEMLIST, listener);
     }
 
+    public void addItemTagChangeListener(PropertyChangeListener listener){
+        listeners.addPropertyChangeListener(PROP_ITEMTAG, listener);
+    }
 
     private TagList tagList = new TagList();
     protected void initializeItemTagSet(){

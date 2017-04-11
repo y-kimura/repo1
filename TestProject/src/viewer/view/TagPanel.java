@@ -272,6 +272,7 @@ public class TagPanel extends JPanel implements TreeSelectionListener{
 					context.filterItemList.get(context.selectIndex).tags.remove(selectedNode.tagId);
 				}
 				((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) tree.getLastSelectedPathComponent());
+				context.listeners.firePropertyChange(ApplicationContext.PROP_ITEMTAG, null, null);
 			}
 			tree.clearSelection();
 		}

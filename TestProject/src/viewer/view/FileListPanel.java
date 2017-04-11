@@ -1,6 +1,7 @@
 package viewer.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -36,7 +37,7 @@ public class FileListPanel extends JPanel {
 	private ApplicationContext context;
 	private ApplicationController controller;
 
-	private DefaultListModel listModel;
+	private DefaultListModel<Item> listModel;
 
 	@SuppressWarnings("unchecked")
 	public FileListPanel(final ApplicationContext context, final ApplicationController controller){
@@ -44,13 +45,13 @@ public class FileListPanel extends JPanel {
         this.controller = controller;
         setLayout(new BorderLayout());
 
-		listModel = new DefaultListModel();
+		listModel = new DefaultListModel<Item>();
 		for(Item item: context.filterItemList) {
 		    listModel.addElement(item);
 		}
 		jList = new JList(listModel);
 		jList.setFixedCellHeight(100);
-		jList.setFixedCellWidth(90);
+		jList.setFixedCellWidth(110);
 		jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		jList.setVisibleRowCount(0);
 		setPreferredSize(new Dimension(400, 240));
@@ -69,7 +70,7 @@ public class FileListPanel extends JPanel {
             }
 		});
 
-        final ListCellRenderer renderer = jList.getCellRenderer();
+		final ListCellRenderer renderer = jList.getCellRenderer();
         jList.setCellRenderer(new ListCellRenderer() {
         	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         		JLabel label = (JLabel)renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -78,6 +79,9 @@ public class FileListPanel extends JPanel {
                 label.setVerticalTextPosition(SwingConstants.BOTTOM);
                 label.setHorizontalTextPosition(SwingConstants.CENTER);
  //               label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
+                if (item.tags.isEmpty()) {
+                    label.setBackground(Color.GRAY);
+                }
         		return label;
         	}
         });
@@ -89,11 +93,17 @@ public class FileListPanel extends JPanel {
 
         this.context.addItemListChangeListener(new PropertyChangeListener() {
             public void propertyChange( PropertyChangeEvent evt ){
-        		listModel = new DefaultListModel();
+        		listModel = new DefaultListModel<Item>();
         		for(Item item: context.filterItemList) {
         		    listModel.addElement(item);
         		}
             	jList.setModel(listModel);
+            }
+        });
+
+        this.context.addItemTagChangeListener(new PropertyChangeListener() {
+            public void propertyChange( PropertyChangeEvent evt ){
+            	listModel.set(jList.getSelectedIndex(), listModel.getElementAt(jList.getSelectedIndex()));
             }
         });
 
