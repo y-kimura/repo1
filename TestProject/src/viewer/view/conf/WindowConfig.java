@@ -5,7 +5,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.Properties;
+
 import javax.swing.JFrame;
+
 import viewer.util.PropertiesUtils;
 
 public class WindowConfig implements SwingConfig<JFrame> {
@@ -64,6 +66,7 @@ public class WindowConfig implements SwingConfig<JFrame> {
         PropertiesUtils.set(props, header+".window.left", left);
         PropertiesUtils.set(props, header+".window.width", width);
         PropertiesUtils.set(props, header+".window.height", height);
+        PropertiesUtils.set(props, header+".window.state", state);
         PropertiesUtils.set(props, header+".window.state", state);
     }
 }

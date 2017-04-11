@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -78,7 +77,7 @@ public class FileListPanel extends JPanel {
                 label.setText(item.getName());
                 label.setVerticalTextPosition(SwingConstants.BOTTOM);
                 label.setHorizontalTextPosition(SwingConstants.CENTER);
-                label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
+ //               label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
         		return label;
         	}
         });
