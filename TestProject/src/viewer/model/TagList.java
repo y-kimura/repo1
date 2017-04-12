@@ -21,7 +21,7 @@ public class TagList {
     			maxId = tag2.id;
     		}
     	}
-		tag.id = maxId;
+		tag.id = maxId + 1;
 		tag.name = name;
 		tag.categoryId = categoryId;
 		tagList.add(tag);
