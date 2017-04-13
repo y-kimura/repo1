@@ -1,6 +1,8 @@
 package viewer.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class TagList {
@@ -25,5 +27,41 @@ public class TagList {
 		tag.name = name;
 		tag.categoryId = categoryId;
 		tagList.add(tag);
+	}
+
+	public int getMaxOrder(int categoryId) {
+		int maxOrder = -1;
+		for (Tag tag: tagList) {
+			if (tag.categoryId == categoryId) {
+				if (tag.order > maxOrder) {
+					maxOrder = tag.order;
+				}
+			}
+		}
+		return maxOrder;
+	}
+
+	public void sortTagList() {
+		Collections.sort(tagList, new Comparator<Tag>(){
+    		public int compare(Tag i1,Tag i2){
+    			if (i1.categoryId > i2.categoryId) {
+    				return +1;
+    			} else if (i1.categoryId < i2.categoryId) {
+    				return -1;
+    			}
+    			return i1.order - i2.order;
+    		}
+    	});
+
+		int i = 0;
+		int currentCateId = -1;
+		for (Tag tag: tagList) {
+			if (tag.categoryId != currentCateId) {
+				currentCateId = tag.categoryId;
+				i = 0;
+			}
+			tag.order = i;
+			i++;
+		}
 	}
 }

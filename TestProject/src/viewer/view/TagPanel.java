@@ -7,6 +7,7 @@ import java.util.EventObject;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -199,53 +200,85 @@ public class TagPanel extends JPanel implements TreeSelectionListener{
 			}
 		});
 
-//		jpopup.add(new AbstractAction("move") {
-//			protected JComboBox<String> categoryComboBox = new JComboBox<String>();
-//			protected final JTextField textField = new JTextField(24) {
-//				protected transient AncestorListener listener;
-//				@Override public void updateUI() {
-//					removeAncestorListener(listener);
-//					super.updateUI();
-//					listener = new AncestorListener() {
-//						@Override public void ancestorAdded(AncestorEvent e) {
-//							requestFocusInWindow();
-//						}
-//						@Override public void ancestorMoved(AncestorEvent e)   { /* not needed */ }
-//						@Override public void ancestorRemoved(AncestorEvent e) { /* not needed */ }
-//					};
-//					addAncestorListener(listener);
-//				}
-//			};
-//			@Override public void actionPerformed(ActionEvent e) {
-//				for (Category cate: context.getCategoryList()) {
-//					categoryComboBox.addItem(cate.name);
-//				}
-//				Object node = jpopup.getPath().getLastPathComponent();
-//				if (node instanceof DefaultMutableTreeNode) {
-//					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
-//					int result = JOptionPane.showConfirmDialog(tree, categoryComboBox, "edit", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-//					if (result == JOptionPane.OK_OPTION) {
-//						String str = textField.getText();
-//						if (!str.trim().isEmpty()) {
-//							if (tagTreeNode.tagFlag) {
-//								for (Tag tag: context.getTagList().tagList) {
-//									if (tag.id == tagTreeNode.tagId) {
-//										tag.name = str;
-//									}
+		jpopup.add(new AbstractAction("moveCate") {
+			@Override public void actionPerformed(ActionEvent e) {
+				Object node = jpopup.getPath().getLastPathComponent();
+				if (node instanceof DefaultMutableTreeNode) {
+					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
+					if (!tagTreeNode.tagFlag) {
+						return;
+					}
+					Tag targetTag = null;
+					for (Tag tag: context.getTagList().tagList) {
+						if (tag.id == tagTreeNode.tagId) {
+							targetTag = tag;
+							break;
+						}
+					}
+					JComboBox<String> categoryComboBox = new JComboBox<String>();
+					for (Category cate: context.getCategoryList()) {
+						if (cate.id == targetTag.categoryId) continue;
+						categoryComboBox.addItem(cate.name);
+					}
+					int result = JOptionPane.showConfirmDialog(tree, categoryComboBox, targetTag.name + "の移動先", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+					if (result == JOptionPane.OK_OPTION) {
+						for (Category cate: context.getCategoryList()) {
+							if (cate.name.equals(categoryComboBox.getSelectedItem())) {
+								targetTag.order = context.getTagList().getMaxOrder(cate.id) + 1;
+								targetTag.categoryId = cate.id;
+								context.getTagList().sortTagList();
+								tree.setModel(createTagTreeModel());
+								for (int i = 0; i < tree.getRowCount(); i++) {
+									tree.expandRow(i);
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+		});
+		jpopup.add(new AbstractAction("cangeOrder") {
+			@Override public void actionPerformed(ActionEvent e) {
+				Object node = jpopup.getPath().getLastPathComponent();
+				if (node instanceof DefaultMutableTreeNode) {
+					TagTreeNode tagTreeNode = (TagTreeNode)((DefaultMutableTreeNode) node).getUserObject();
+					if (!tagTreeNode.tagFlag) {
+						return;
+					}
+					Tag targetTag = null;
+					for (Tag tag: context.getTagList().tagList) {
+						if (tag.id == tagTreeNode.tagId) {
+							targetTag = tag;
+							break;
+						}
+					}
+					JComboBox<String> tagComboBox = new JComboBox<String>();
+					for (Tag tag: context.getTagList().tagList) {
+						if (tag.categoryId == targetTag.categoryId) {
+							tagComboBox.addItem(tag.name);
+						}
+					}
+					int result = JOptionPane.showConfirmDialog(tree, tagComboBox, targetTag.name + "の移動先", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+					if (result == JOptionPane.OK_OPTION) {
+//						int i = 0;
+//						for (Tag tag: context.getTagList().tagList) {
+//							if (tag.name.equals(tagComboBox.getSelectedItem())) {
+//								context.getTagList().tagList.add(i, targetTag);
+//								targetTag.categoryId = cate.id;
+//								context.getTagList().sortTagList();
+//								tree.setModel(createTagTreeModel());
+//								for (int i = 0; i < tree.getRowCount(); i++) {
+//									tree.expandRow(i);
 //								}
-//							} else {
-//								for (Category cate: context.getCategoryList()) {
-//									if (cate.id == tagTreeNode.tagId) {
-//										cate.name = str;
-//									}
-//								}
+//								break;
 //							}
-//							((DefaultTreeModel)tree.getModel()).nodeChanged((DefaultMutableTreeNode) node);
+//							i++;
 //						}
-//					}
-//				}
-//			}
-//		});
+					}
+				}
+			}
+		});
 //		private final Action removeNodeAction = new AbstractAction("remove") {
 //		@Override public void actionPerformed(ActionEvent e) {
 //			DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
