@@ -29,8 +29,8 @@ public class Test3 extends MediaListenerAdapter {
 //	private static String INPUT_DIR = "D:\\testtest";
 //	private static String OUTPUT_DIR = "D:\\testtest\\ss";
 
-	private static String INPUT_DIR = "E:\\test";
-	private static String OUTPUT_DIR = "E:\\test\\ss";
+	private static String INPUT_DIR = "D:\\testtest";
+	private static String OUTPUT_DIR = "D:\\testtest\\ss";
 
 	String[] suffixArray = {"wmv","mp4","flv"};
 

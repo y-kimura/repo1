@@ -16,13 +16,10 @@ import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
-import com.xuggle.xuggler.Global;
-import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
 
-public class Test extends MediaListenerAdapter {
+public class Test0418 extends MediaListenerAdapter {
 	private static final String INPUT_DIR = "D:\\testtest";
 	private static final String OUTPUT_DIR = "D:\\testtest\\ss";
 
@@ -33,63 +30,52 @@ public class Test extends MediaListenerAdapter {
 	private int thumbIndex = 1;
 	private boolean proccessFlg = false;
 
-	private static final Logger log = LoggerFactory.getLogger(Test.class);
+	private static final Logger log = LoggerFactory.getLogger(Test0418.class);
 
 	public static void main(String[] args) {
-		new Test();
+		new Test0418();
 	}
 
-	public Test() {
+	public Test0418() {
 
 		for (File file : files) {
 			if (!Arrays.asList(SUFFIX_ARRAY).contains(getSuffix(file.getName()))) {
 				fileIndex++;
 				continue;
 			}
-			IMediaReader reader = ToolFactory.makeReader(file.getPath());
-			try {
-				reader.open();
-				reader.setBufferedImageTypeToGenerate(5);
-				reader.addListener(this);
 
-				IContainer container = reader.getContainer();
-				if (container.getDuration() == Global.NO_PTS) {
-					continue;
-				}
-				log.info("# Duration (ms): " + container.getDuration() / 100);
-				long thumbBetweenDurationMs = container.getDuration() / 500;
+	        thumbIndex = 1;
+	        long totalDuration = 0;
+			while (thumbIndex < 6) {
+				try {
+					IMediaReader reader = ToolFactory.makeReader(file.getPath());
+					reader.open();
+					reader.setBufferedImageTypeToGenerate(5);
+					reader.addListener(this);
 
-				int videoStreamId = -1;
-				double timeBase = 0;
-		        for(int i = 0; i < container.getNumStreams(); i++) {
-		            IStream stream = container.getStream(i);
-		            IStreamCoder coder = stream.getStreamCoder();
-		            if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
-		                videoStreamId = i;
-		                timeBase = stream.getTimeBase().getDouble();
-		                break;
-		            }
-		        }
+					IContainer container = reader.getContainer();
+					int videoStreamId = -1;
+					double timeBase = 0;
 
-				long totalDuration = 0;
-				for (int i = 0; i < 5; i++) {
-					if (i == 0) {
-						seekToMs(container, 20000, videoStreamId, timeBase);
+					log.info("# Duration (ms): " + container.getDuration() / 1000);
+					long thumbBetweenDurationMs = container.getDuration() / 5000;
+
+		            IStream stream = container.getStream(0);
+		            timeBase = stream.getTimeBase().getDouble();
+
+					if (thumbIndex == 1) {
+						seekToMs(container, 10000, videoStreamId, timeBase);
 					} else {
 						seekToMs(container, totalDuration, videoStreamId, timeBase);
 					}
 					totalDuration += thumbBetweenDurationMs;
-					thumbIndex = i + 1;
 					proccessFlg = false;
 					while (reader.readPacket() == null && !proccessFlg) {
-						log.info("a");
 					}
+					thumbIndex += 1;
+				} catch(Exception e) {
+					e.printStackTrace();
 				}
-
-			} catch(Exception e) {
-				e.printStackTrace();
-			} finally {
-				reader.close();
 			}
 			fileIndex++;
 		}
@@ -97,7 +83,7 @@ public class Test extends MediaListenerAdapter {
 
 	public void onVideoPicture(IVideoPictureEvent event) {
 		try {
-			BufferedImage sumbImage = reSize3(event.getImage(), 90,75);
+			BufferedImage sumbImage = reSize3(event.getImage(), 100,90);
 			File outputFile = new File(OUTPUT_DIR, "_smb" + thumbIndex + "_" + files[fileIndex].getName() + ".png");
 			log.info("# Create: " + "_smb" + thumbIndex + "_" + files[fileIndex].getName() + ".png");
 
@@ -130,6 +116,7 @@ public class Test extends MediaListenerAdapter {
 	private void seekToMs(IContainer container, long timeMs, int videoStreamId, double timeBase) {
 		log.info("# Seek (ms): " + timeMs);
 	    long seekTo = (long) (timeMs/1000.0/timeBase);
-	    container.seekKeyFrame(videoStreamId, seekTo, IContainer.SEEK_FLAG_BACKWARDS);
+	    log.info("# seekTo: " + seekTo);
+	    container.seekKeyFrame(0, seekTo, IContainer.SEEK_FLAG_BACKWARDS);
 	}
 }
