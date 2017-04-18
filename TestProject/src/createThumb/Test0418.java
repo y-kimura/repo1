@@ -20,8 +20,8 @@ import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IStream;
 
 public class Test0418 extends MediaListenerAdapter {
-	private static final String INPUT_DIR = "D:\\testtest";
-	private static final String OUTPUT_DIR = "D:\\testtest\\ss";
+	private static final String INPUT_DIR = "E:\\test";
+	private static final String OUTPUT_DIR = "E:\\test\\ss";
 
 	private static final String[] SUFFIX_ARRAY = {"wmv","mp4","flv"};
 
@@ -37,6 +37,7 @@ public class Test0418 extends MediaListenerAdapter {
 	}
 
 	public Test0418() {
+        IMediaReader reader = null;
 
 		for (File file : files) {
 			if (!Arrays.asList(SUFFIX_ARRAY).contains(getSuffix(file.getName()))) {
@@ -45,28 +46,33 @@ public class Test0418 extends MediaListenerAdapter {
 			}
 
 	        thumbIndex = 1;
+
 	        long totalDuration = 0;
+
+
+
 			while (thumbIndex < 6) {
 				try {
-					IMediaReader reader = ToolFactory.makeReader(file.getPath());
+
+					reader = ToolFactory.makeReader(file.getPath());
 					reader.open();
 					reader.setBufferedImageTypeToGenerate(5);
 					reader.addListener(this);
 
-					IContainer container = reader.getContainer();
+
 					int videoStreamId = -1;
 					double timeBase = 0;
+					IContainer container = reader.getContainer();
 
-					log.info("# Duration (ms): " + container.getDuration() / 1000);
 					long thumbBetweenDurationMs = container.getDuration() / 5000;
 
 		            IStream stream = container.getStream(0);
 		            timeBase = stream.getTimeBase().getDouble();
 
 					if (thumbIndex == 1) {
-						seekToMs(container, 10000, videoStreamId, timeBase);
+						seekToMs(reader.getContainer(), 10000, videoStreamId, timeBase);
 					} else {
-						seekToMs(container, totalDuration, videoStreamId, timeBase);
+						seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
 					}
 					totalDuration += thumbBetweenDurationMs;
 					proccessFlg = false;
@@ -75,6 +81,8 @@ public class Test0418 extends MediaListenerAdapter {
 					thumbIndex += 1;
 				} catch(Exception e) {
 					e.printStackTrace();
+				} finally {
+					reader.close();
 				}
 			}
 			fileIndex++;
@@ -85,7 +93,6 @@ public class Test0418 extends MediaListenerAdapter {
 		try {
 			BufferedImage sumbImage = reSize3(event.getImage(), 100,90);
 			File outputFile = new File(OUTPUT_DIR, "_smb" + thumbIndex + "_" + files[fileIndex].getName() + ".png");
-			log.info("# Create: " + "_smb" + thumbIndex + "_" + files[fileIndex].getName() + ".png");
 
 			ImageIO.write(sumbImage, "png", outputFile);
 			proccessFlg = true;
@@ -114,9 +121,7 @@ public class Test0418 extends MediaListenerAdapter {
 	}
 
 	private void seekToMs(IContainer container, long timeMs, int videoStreamId, double timeBase) {
-		log.info("# Seek (ms): " + timeMs);
 	    long seekTo = (long) (timeMs/1000.0/timeBase);
-	    log.info("# seekTo: " + seekTo);
 	    container.seekKeyFrame(0, seekTo, IContainer.SEEK_FLAG_BACKWARDS);
 	}
 }
