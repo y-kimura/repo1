@@ -14,7 +14,10 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -73,16 +76,30 @@ public class FileListPanel extends JPanel {
 		final ListCellRenderer renderer = jList.getCellRenderer();
         jList.setCellRenderer(new ListCellRenderer() {
         	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        		JLabel label = (JLabel)renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         		Item item = (Item)value;
-                label.setText(item.getName());
-                label.setVerticalTextPosition(SwingConstants.BOTTOM);
-                label.setHorizontalTextPosition(SwingConstants.CENTER);
- //               label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
-                if (item.tags.isEmpty()) {
-                    label.setBackground(Color.GRAY);
-                }
-        		return label;
+        		if (context.getImageListViewType() == ApplicationContext.TYPE_VIEW_LIST) {
+            		JLabel label = (JLabel)renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                    label.setText(item.getName());
+                    label.setVerticalTextPosition(SwingConstants.BOTTOM);
+                    label.setHorizontalTextPosition(SwingConstants.CENTER);
+     //               label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
+                    if (item.tags.isEmpty()) {
+                        label.setBackground(Color.GRAY);
+                    }
+            		return label;
+        		} else {
+        			JPanel panel = new JPanel();
+        			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        			for (int i = 1; i < 6 ; i++) {
+            			panel.add(new JLabel(new ImageIcon(context.smbDir + "\\"+ ApplicationContext.createThumbFileName(item.name, i))));
+            			panel.add(Box.createRigidArea(new Dimension(5,5)));
+        			}
+        			panel.add(new JLabel(item.name));
+        			if (isSelected) {
+        				panel.setBackground(Color.CYAN);
+        			}
+            		return panel;
+        		}
         	}
         });
 
@@ -104,6 +121,21 @@ public class FileListPanel extends JPanel {
         this.context.addItemTagChangeListener(new PropertyChangeListener() {
             public void propertyChange( PropertyChangeEvent evt ){
             	listModel.set(jList.getSelectedIndex(), listModel.getElementAt(jList.getSelectedIndex()));
+            }
+        });
+
+        this.context.addImageListViewTypeChangeListener(new PropertyChangeListener() {
+            public void propertyChange( PropertyChangeEvent evt ){
+            	if ((int)evt.getNewValue() == ApplicationContext.TYPE_VIEW_LIST) {
+            		jList.setFixedCellHeight(100);
+            		jList.setFixedCellWidth(110);
+            		jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+            	} else {
+            		jList.setFixedCellHeight(100);
+            		jList.setFixedCellWidth(-1);
+            		jList.setLayoutOrientation(JList.VERTICAL);
+            	}
+        		jList.repaint();
             }
         });
 

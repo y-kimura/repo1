@@ -5,6 +5,8 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
+import viewer.ApplicationContext;
+
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleFilters;
 import com.mortennobel.imagescaling.ResampleOp;
@@ -12,40 +14,61 @@ import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
-import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
 
 public class CreateThumbUtils extends MediaListenerAdapter {
 
-	private int mVideoStreamIndex = -1;
 	private String OutputPath = "";
-
-	double timeBase = 0;
-	int videoStreamId = -1;
+	private File inputFile;
+	private int thumbIndex = 1;
+	private boolean proccessFlg = false;
 
 	public void createThumbUtils() {
-
 	}
 
 	public void createThumb(File inputFile, String OutputPath) {
 
+		this.inputFile = inputFile;
 		this.OutputPath = OutputPath;
 
-		IMediaReader reader = ToolFactory.makeReader(inputFile.getPath());
+		IMediaReader reader = null;
 		try {
-			reader.open();
+			long totalDuration = 0;
 
-			timeBase = 0;
-			videoStreamId = -1;
-			seekToMs(reader.getContainer(), 10000);
+			while (thumbIndex < 6) {
+				try {
 
-			reader.setBufferedImageTypeToGenerate(5);
+					reader = ToolFactory.makeReader(inputFile.getPath());
+					reader.open();
+					reader.setBufferedImageTypeToGenerate(5);
+					reader.addListener(this);
 
-			reader.addListener(this);
 
-			while (reader.readPacket() == null && mVideoStreamIndex == -1) {
+					int videoStreamId = -1;
+					double timeBase = 0;
+					IContainer container = reader.getContainer();
+
+					long thumbBetweenDurationMs = container.getDuration() / 5000;
+
+		            IStream stream = container.getStream(0);
+		            timeBase = stream.getTimeBase().getDouble();
+
+					if (thumbIndex == 1) {
+						seekToMs(reader.getContainer(), 10000, videoStreamId, timeBase);
+					} else {
+						seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
+					}
+					totalDuration += thumbBetweenDurationMs;
+					proccessFlg = false;
+					while (reader.readPacket() == null && !proccessFlg) {
+					}
+					thumbIndex += 1;
+				} catch(Exception e) {
+					e.printStackTrace();
+				} finally {
+					reader.close();
+				}
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -56,17 +79,11 @@ public class CreateThumbUtils extends MediaListenerAdapter {
 
 	public void onVideoPicture(IVideoPictureEvent event) {
 		try {
-			if (event.getStreamIndex().intValue() != this.mVideoStreamIndex) {
-				if (-1 == this.mVideoStreamIndex) {
-					this.mVideoStreamIndex = event.getStreamIndex().intValue();
-				} else {
-					return;
-				}
-			}
 			BufferedImage sumbImage = reSize3(event.getImage(), 100, 80);
-			File outputFile = new File(OutputPath);
+			File outputFile = new File(OutputPath + "\\" + ApplicationContext.createThumbFileName(inputFile.getName(), thumbIndex));
 
 			ImageIO.write(sumbImage, "png", outputFile);
+			proccessFlg = true;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -81,20 +98,8 @@ public class CreateThumbUtils extends MediaListenerAdapter {
 		return rescaled;
 	}
 
-	private void seekToMs(IContainer container, long timeMs) {
-	    if(videoStreamId == -1) {
-	        for(int i = 0; i < container.getNumStreams(); i++) {
-	            IStream stream = container.getStream(i);
-	            IStreamCoder coder = stream.getStreamCoder();
-	            if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
-	                videoStreamId = i;
-	                timeBase = stream.getTimeBase().getDouble();
-	                break;
-	            }
-	        }
-	    }
-
+	private void seekToMs(IContainer container, long timeMs, int videoStreamId, double timeBase) {
 	    long seekTo = (long) (timeMs/1000.0/timeBase);
-	    container.seekKeyFrame(videoStreamId, seekTo, IContainer.SEEK_FLAG_BACKWARDS);
+	    container.seekKeyFrame(0, seekTo, IContainer.SEEK_FLAG_BACKWARDS);
 	}
 }

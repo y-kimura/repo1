@@ -40,11 +40,16 @@ public class ApplicationContext {
 	public static final String PROP_TAGLIST = "TagList";
 	public static final String PROP_CATEGORYLIST = "CategoryList";
 	public static final String PROP_FILTERLIST = "filterList";
+    public static final String PROP_FILELISTVIEWTYPE = "fileListViewType";
 
 	public static final String TAGLIST_FILE = "data\\TAGLIST.dat";
 	public static final String CATEGORYLIST_FILE = "data\\CATEGORYLIST.dat";
 	public static final String ITEMLIST_FILE = "data\\ITEMLIST.dat";
 
+    /** リスト表示形式 */
+    public static final int TYPE_VIEW_LIST = 0;
+    /** テーブル表示形式 */
+    public static final int TYPE_VIEW_DETAIL = 1;
 
 	public PropertyChangeSupport listeners;
 	private Properties props;
@@ -207,10 +212,9 @@ public class ApplicationContext {
 				continue;
 			}
 
-			if (!new File(smbDir + "\\" + createThumbFileName(item.name, item.thumbNumber)).exists()) {
-				item.thumbNumber = 1;
+			if (!new File(smbDir + "\\" + createThumbFileName(item.name, 1)).exists()) {
 				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
-				createThumbUtils.createThumb(item.file, smbDir + "\\"+ createThumbFileName(item.name, item.thumbNumber));
+				createThumbUtils.createThumb(item.file, smbDir);
 			}
 		}
 		sortItemList();
@@ -227,8 +231,8 @@ public class ApplicationContext {
 	    return fileName;
 	}
 
-	private static String createThumbFileName(String name, int thumbNumber) {
-		return "_smb" + thumbNumber + "_" + name + ".png";
+	public static String createThumbFileName(String name, int thumbNumber) {
+		return name + "__smb" + thumbNumber + "__" + ".png";
 	}
 
     protected void finalizeItemList(){
@@ -380,5 +384,27 @@ public class ApplicationContext {
     }
     public WindowConfig getTagSearchWindowConfig(){
         return tagsearchwindow;
+    }
+
+    /*-----------------------------------------------------------------------
+     * ファイルリストのレイアウト方式
+     *----------------------------------------------------------------------*/
+    private int fileListViewType = 0;
+//    protected void initializefileListViewType(){
+//    	fileListViewType = PropertiesUtils.intValue(props, PROP_FILELISTVIEWTYPE, 0);
+//    }
+//    protected void finalizeImageListViewType(){
+//        PropertiesUtils.set(props, PROP_FILELISTVIEWTYPE, fileListViewType);
+//    }
+    public int getImageListViewType(){
+        return fileListViewType;
+    }
+    public void setImageListViewType(int newFileListViewType ){
+        int old = this.fileListViewType;
+        this.fileListViewType = newFileListViewType;
+        listeners.firePropertyChange(PROP_FILELISTVIEWTYPE, old, newFileListViewType);
+    }
+    public void addImageListViewTypeChangeListener(PropertyChangeListener listener){
+        listeners.addPropertyChangeListener(PROP_FILELISTVIEWTYPE, listener);
     }
 }
