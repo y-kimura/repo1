@@ -12,9 +12,11 @@ public class Item implements Serializable{
 	public String name;
 	public int thumbNumber;
 	public String playTime;
+	public boolean thumbError;
 	public File file;
 	public Set<Integer> tags = new HashSet<Integer>();
 	public List<String> sampleImageList = new ArrayList<String>();
+
 	public String getName() {
 		return name;
 	}
@@ -47,4 +49,6 @@ public class Item implements Serializable{
 			return false;
 		}
 	}
+
+
 }

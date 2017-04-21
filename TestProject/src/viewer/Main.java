@@ -3,6 +3,7 @@ package viewer;
 import java.io.File;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.slf4j.Logger;
@@ -15,17 +16,21 @@ public class Main {
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String[] args) throws Exception {
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		SwingUtilities.invokeAndWait(new Runnable(){
+			public void run() {
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-			ApplicationContext context = new ApplicationContext(new File("data\\conf.properties"));
+					ApplicationContext context = new ApplicationContext(new File("data\\conf.properties"));
 
-			MainWindow window = new MainWindow(context);
-			window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			window.setVisible(true);
+					MainWindow window = new MainWindow(context);
+					window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+					window.setVisible(true);
 
-		}catch(Exception e){
-			log.error("error",e);
-		}
+				}catch(Exception e){
+					log.error("error",e);
+				}
+			}
+		});
 	}
 }

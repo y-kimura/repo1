@@ -21,7 +21,6 @@ import viewer.model.Category;
 import viewer.model.Item;
 import viewer.model.Tag;
 import viewer.model.TagList;
-import viewer.util.CreateThumbUtils;
 import viewer.util.IOUtils;
 import viewer.util.PropertiesUtils;
 import viewer.util.PropertyBuilder;
@@ -45,6 +44,8 @@ public class ApplicationContext {
 	public static final String TAGLIST_FILE = "data\\TAGLIST.dat";
 	public static final String CATEGORYLIST_FILE = "data\\CATEGORYLIST.dat";
 	public static final String ITEMLIST_FILE = "data\\ITEMLIST.dat";
+
+	public static final String TMP_THUMB_FILE = "data\\TEMP_THUMB.png";
 
     /** リスト表示形式 */
     public static final int TYPE_VIEW_LIST = 0;
@@ -212,10 +213,10 @@ public class ApplicationContext {
 				continue;
 			}
 
-			if (!new File(smbDir + "\\" + createThumbFileName(item.name, 1)).exists()) {
-				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
-				createThumbUtils.createThumb(item.file, smbDir);
-			}
+//			if (!new File(smbDir + "\\" + createThumbFileName(item.name, 1)).exists()) {
+//				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
+//				createThumbUtils.createThumb(item.file, smbDir);
+//			}
 		}
 		sortItemList();
 		filterItemList();

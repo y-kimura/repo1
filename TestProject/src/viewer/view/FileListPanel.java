@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -27,10 +28,15 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
 import viewer.ApplicationControllerListener;
 import viewer.model.Item;
+import viewer.task.BackgroundTaskManager;
+import viewer.util.CreateThumbUtils;
 
 public class FileListPanel extends JPanel {
 
@@ -41,6 +47,8 @@ public class FileListPanel extends JPanel {
 	private ApplicationController controller;
 
 	private DefaultListModel<Item> listModel;
+
+	private static final Logger log = LoggerFactory.getLogger(FileListPanel.class);
 
 	@SuppressWarnings("unchecked")
 	public FileListPanel(final ApplicationContext context, final ApplicationController controller){
@@ -82,7 +90,17 @@ public class FileListPanel extends JPanel {
                     label.setText(item.getName());
                     label.setVerticalTextPosition(SwingConstants.BOTTOM);
                     label.setHorizontalTextPosition(SwingConstants.CENTER);
-     //               label.setIcon(new ImageIcon(context.smbDir + "\\"+ item.getThumbName()));
+                    File thumbFile = getAndCreateThumbFile(item, 1, new Runnable() {
+                        public void run(){
+                            Rectangle r = list.getCellBounds(index, index);
+                            list.repaint(r);
+                        }
+                    });
+                    if(!thumbFile.exists()){
+                        label.setIcon(new ImageIcon(ApplicationContext.TMP_THUMB_FILE));
+                    } else {
+                    	label.setIcon(new ImageIcon(thumbFile.getPath()));
+                    }
                     if (item.tags.isEmpty()) {
                         label.setBackground(Color.GRAY);
                     }
@@ -91,7 +109,17 @@ public class FileListPanel extends JPanel {
         			JPanel panel = new JPanel();
         			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         			for (int i = 1; i < 6 ; i++) {
-            			panel.add(new JLabel(new ImageIcon(context.smbDir + "\\"+ ApplicationContext.createThumbFileName(item.name, i))));
+                        File thumbFile = getAndCreateThumbFile(item, i, new Runnable() {
+                            public void run(){
+                                Rectangle r = list.getCellBounds(index, index);
+                                list.repaint(r);
+                            }
+                        });
+                        if(!thumbFile.exists()){
+                        	panel.add(new JLabel(new ImageIcon(ApplicationContext.TMP_THUMB_FILE)));
+                        } else {
+                			panel.add(new JLabel(new ImageIcon(thumbFile.getPath())));
+                        }
             			panel.add(Box.createRigidArea(new Dimension(5,5)));
         			}
         			panel.add(new JLabel(item.name));
@@ -142,6 +170,32 @@ public class FileListPanel extends JPanel {
         JScrollPane sp = new JScrollPane(jList);
         this.add(sp, BorderLayout.CENTER);
 	}
+
+    synchronized
+    private File getAndCreateThumbFile(final Item item, final int thumbIndex, final Runnable cmd ){
+        try {
+        	File thumbFile = new File(context.smbDir + "\\"+ ApplicationContext.createThumbFileName(item.name, thumbIndex));
+            if(!thumbFile.exists() && !item.thumbError){
+                BackgroundTaskManager.executeTask(new Runnable() {
+                    public void run(){
+                        if(!thumbFile.exists()){
+                            try {
+                				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
+                				createThumbUtils.createThumb(item.file, thumbFile, thumbIndex);
+                                cmd.run();
+                            }catch(Exception e){
+                                item.thumbError = true;
+                                log.error("0001", e, getName());
+                            }
+                        }
+                    }
+                });
+            }
+            return thumbFile;
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
 	/**
 	 * JList�p�̃L�[���X�i�[

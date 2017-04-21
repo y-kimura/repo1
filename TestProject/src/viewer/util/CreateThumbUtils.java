@@ -5,8 +5,6 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
-import viewer.ApplicationContext;
-
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleFilters;
 import com.mortennobel.imagescaling.ResampleOp;
@@ -19,56 +17,49 @@ import com.xuggle.xuggler.IStream;
 
 public class CreateThumbUtils extends MediaListenerAdapter {
 
-	private String OutputPath = "";
-	private File inputFile;
-	private int thumbIndex = 1;
+	private File outputFile;
 	private boolean proccessFlg = false;
 
 	public void createThumbUtils() {
 	}
 
-	public void createThumb(File inputFile, String OutputPath) {
+	public void createThumb(File inputFile, File outputFile, int thumbIndex) {
 
-		this.inputFile = inputFile;
-		this.OutputPath = OutputPath;
+		this.outputFile = outputFile;
 
 		IMediaReader reader = null;
 		try {
 			long totalDuration = 0;
 
-			while (thumbIndex < 6) {
-				try {
+			try {
 
-					reader = ToolFactory.makeReader(inputFile.getPath());
-					reader.open();
-					reader.setBufferedImageTypeToGenerate(5);
-					reader.addListener(this);
+				reader = ToolFactory.makeReader(inputFile.getPath());
+				reader.open();
+				reader.setBufferedImageTypeToGenerate(5);
+				reader.addListener(this);
 
+				int videoStreamId = -1;
+				double timeBase = 0;
+				IContainer container = reader.getContainer();
 
-					int videoStreamId = -1;
-					double timeBase = 0;
-					IContainer container = reader.getContainer();
+				long thumbBetweenDurationMs = container.getDuration() / 5000;
 
-					long thumbBetweenDurationMs = container.getDuration() / 5000;
+	            IStream stream = container.getStream(0);
+	            timeBase = stream.getTimeBase().getDouble();
 
-		            IStream stream = container.getStream(0);
-		            timeBase = stream.getTimeBase().getDouble();
-
-					if (thumbIndex == 1) {
-						seekToMs(reader.getContainer(), 10000, videoStreamId, timeBase);
-					} else {
-						seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
-					}
-					totalDuration += thumbBetweenDurationMs;
-					proccessFlg = false;
-					while (reader.readPacket() == null && !proccessFlg) {
-					}
-					thumbIndex += 1;
-				} catch(Exception e) {
-					e.printStackTrace();
-				} finally {
-					reader.close();
+				if (thumbIndex == 1) {
+					seekToMs(reader.getContainer(), 10000, videoStreamId, timeBase);
+				} else {
+					totalDuration = thumbBetweenDurationMs * thumbIndex;
+					seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
 				}
+				proccessFlg = false;
+				while (reader.readPacket() == null && !proccessFlg) {
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			} finally {
+				reader.close();
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -80,7 +71,6 @@ public class CreateThumbUtils extends MediaListenerAdapter {
 	public void onVideoPicture(IVideoPictureEvent event) {
 		try {
 			BufferedImage sumbImage = reSize3(event.getImage(), 100, 80);
-			File outputFile = new File(OutputPath + "\\" + ApplicationContext.createThumbFileName(inputFile.getName(), thumbIndex));
 
 			ImageIO.write(sumbImage, "png", outputFile);
 			proccessFlg = true;
