@@ -5,6 +5,9 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.mortennobel.imagescaling.AdvancedResizeOp;
 import com.mortennobel.imagescaling.ResampleFilters;
 import com.mortennobel.imagescaling.ResampleOp;
@@ -15,10 +18,14 @@ import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IStream;
 
+import viewer.ApplicationContext;
+import viewer.view.FileListPanel;
+
 public class CreateThumbUtils extends MediaListenerAdapter {
 
 	private File outputFile;
 	private boolean proccessFlg = false;
+	private static final Logger log = LoggerFactory.getLogger(FileListPanel.class);
 
 	public void createThumbUtils() {
 	}
@@ -42,17 +49,14 @@ public class CreateThumbUtils extends MediaListenerAdapter {
 				double timeBase = 0;
 				IContainer container = reader.getContainer();
 
-				long thumbBetweenDurationMs = container.getDuration() / 5000;
+				long thumbBetweenDurationMs = container.getDuration() / (1000 * (ApplicationContext.MAX_THUMB + 1));
 
 	            IStream stream = container.getStream(0);
 	            timeBase = stream.getTimeBase().getDouble();
 
-				if (thumbIndex == 1) {
-					seekToMs(reader.getContainer(), 10000, videoStreamId, timeBase);
-				} else {
-					totalDuration = thumbBetweenDurationMs * thumbIndex;
-					seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
-				}
+				totalDuration = thumbBetweenDurationMs * thumbIndex;
+				seekToMs(reader.getContainer(), totalDuration, videoStreamId, timeBase);
+
 				proccessFlg = false;
 				while (reader.readPacket() == null && !proccessFlg) {
 				}

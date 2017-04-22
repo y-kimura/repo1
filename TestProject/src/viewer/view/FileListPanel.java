@@ -92,8 +92,10 @@ public class FileListPanel extends JPanel {
                     label.setHorizontalTextPosition(SwingConstants.CENTER);
                     File thumbFile = getAndCreateThumbFile(item, 1, new Runnable() {
                         public void run(){
-                            Rectangle r = list.getCellBounds(index, index);
-                            list.repaint(r);
+                        	if (item.thumbStat.get(1) == 2) {
+	                            Rectangle r = list.getCellBounds(index, index);
+	                            list.repaint(r);
+                        	}
                         }
                     });
                     if(!thumbFile.exists()){
@@ -108,9 +110,12 @@ public class FileListPanel extends JPanel {
         		} else {
         			JPanel panel = new JPanel();
         			panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        			for (int i = 1; i < 6 ; i++) {
+        			for (int i = 1; i <= ApplicationContext.MAX_THUMB ; i++) {
                         File thumbFile = getAndCreateThumbFile(item, i, new Runnable() {
                             public void run(){
+                            	for(int value: item.thumbStat.values()) {
+                            		if (value == 1)return;
+                            	}
                                 Rectangle r = list.getCellBounds(index, index);
                                 list.repaint(r);
                             }
@@ -123,6 +128,7 @@ public class FileListPanel extends JPanel {
             			panel.add(Box.createRigidArea(new Dimension(5,5)));
         			}
         			panel.add(new JLabel(item.name));
+        			panel.setPreferredSize(null);
         			if (isSelected) {
         				panel.setBackground(Color.CYAN);
         			}
@@ -160,7 +166,7 @@ public class FileListPanel extends JPanel {
             		jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
             	} else {
             		jList.setFixedCellHeight(100);
-            		jList.setFixedCellWidth(-1);
+            		jList.setFixedCellWidth(1500);
             		jList.setLayoutOrientation(JList.VERTICAL);
             	}
         		jList.repaint();
@@ -172,21 +178,21 @@ public class FileListPanel extends JPanel {
 	}
 
     synchronized
-    private File getAndCreateThumbFile(final Item item, final int thumbIndex, final Runnable cmd ){
+    private File getAndCreateThumbFile(Item item, final int thumbIndex, final Runnable cmd ){
         try {
         	File thumbFile = new File(context.smbDir + "\\"+ ApplicationContext.createThumbFileName(item.name, thumbIndex));
-            if(!thumbFile.exists() && !item.thumbError){
+            if(!thumbFile.exists() && !item.thumbStat.containsKey(thumbIndex)){
+            	item.thumbStat.put(thumbIndex, 1);
                 BackgroundTaskManager.executeTask(new Runnable() {
                     public void run(){
-                        if(!thumbFile.exists()){
-                            try {
-                				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
-                				createThumbUtils.createThumb(item.file, thumbFile, thumbIndex);
-                                cmd.run();
-                            }catch(Exception e){
-                                item.thumbError = true;
-                                log.error("0001", e, getName());
-                            }
+                        try {
+            				CreateThumbUtils createThumbUtils = new CreateThumbUtils();
+            				createThumbUtils.createThumb(item.file, thumbFile, thumbIndex);
+                        	item.thumbStat.replace(thumbIndex, 2);
+                        	log.debug("createThumb="+ item.name);
+                            cmd.run();
+                        }catch(Exception e){
+                            log.error(getName() + " :thumbIndex=" +  thumbIndex, e);
                         }
                     }
                 });

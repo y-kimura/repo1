@@ -47,6 +47,8 @@ public class ApplicationContext {
 
 	public static final String TMP_THUMB_FILE = "data\\TEMP_THUMB.png";
 
+	public static final int MAX_THUMB = 8;
+
     /** リスト表示形式 */
     public static final int TYPE_VIEW_LIST = 0;
     /** テーブル表示形式 */

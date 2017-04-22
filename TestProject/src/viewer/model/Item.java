@@ -2,9 +2,9 @@ package viewer.model;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Item implements Serializable{
@@ -12,10 +12,9 @@ public class Item implements Serializable{
 	public String name;
 	public int thumbNumber;
 	public String playTime;
-	public boolean thumbError;
 	public File file;
 	public Set<Integer> tags = new HashSet<Integer>();
-	public List<String> sampleImageList = new ArrayList<String>();
+	public Map<Integer, Integer> thumbStat = new HashMap<Integer, Integer>();
 
 	public String getName() {
 		return name;
