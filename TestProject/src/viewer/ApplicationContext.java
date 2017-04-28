@@ -119,7 +119,7 @@ public class ApplicationContext {
 
     public void filterItemList() {
 		filterItemList = new ArrayList<Item>();
-    	if (filterTagList.isEmpty()) {
+    	if (filterTagList.isEmpty() && antiFilterTagList.isEmpty()) {
         	for (Item item: sortItemFullList) {
         		filterItemList.add(item);
         	}
@@ -138,6 +138,13 @@ public class ApplicationContext {
 	    			int flag = 0;
 	    			for (int id: filterTagList) {
 	    				if (!item.tags.contains(id)) {
+	    					flag = 1;
+	    					break;
+	    				}
+	    			}
+	    			if (flag == 1)continue;
+	    			for (int id: antiFilterTagList) {
+	    				if (item.tags.contains(id)) {
 	    					flag = 1;
 	    					break;
 	    				}
@@ -365,6 +372,7 @@ public class ApplicationContext {
     }
 
     public List<Integer> filterTagList = new ArrayList<Integer>();
+    public List<Integer> antiFilterTagList = new ArrayList<Integer>();
     public int filterType = 1;
 
     public void addFilterListChangeListener(PropertyChangeListener listener){
