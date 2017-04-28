@@ -15,6 +15,15 @@ public class TagList {
 		tagList.add(tag);
 	}
 
+	public Tag getTagById(int id) {
+		for (Tag tag: tagList) {
+			if (tag.id == id) {
+				return tag;
+			}
+		}
+		return null;
+	}
+
 	public void add(String name, int categoryId) {
 		int maxId = 0;
 		Tag tag = new Tag();

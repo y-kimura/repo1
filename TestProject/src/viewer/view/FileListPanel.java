@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -25,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -127,7 +129,18 @@ public class FileListPanel extends JPanel {
                         }
             			panel.add(Box.createRigidArea(new Dimension(5,5)));
         			}
-        			panel.add(new JLabel(item.name));
+        			JPanel tagPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        			for (int id: item.tags) {
+        				JLabel tagLabel = new JLabel(context.getTagList().getTagById(id).name);
+        				tagLabel.setBorder(new LineBorder(Color.RED, 1, false));
+        				tagPanel.add(tagLabel);
+        			}
+        			tagPanel.setSize(150, 100);
+        			tagPanel.setBorder(new LineBorder(Color.RED, 1, false));
+        			panel.add(tagPanel);
+        			JLabel nameLabel = new JLabel(item.name);
+        			//nameLabel.setSize(150, 100);
+        			panel.add(nameLabel);
         			panel.setPreferredSize(null);
         			if (isSelected) {
         				panel.setBackground(Color.CYAN);
