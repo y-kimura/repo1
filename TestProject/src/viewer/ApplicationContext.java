@@ -102,12 +102,15 @@ public class ApplicationContext {
 	}
 
     private WindowConfig mainwindow = new WindowConfig(PROP_MAINWINDOW);
+    public int mainwindowDividerLocation;
     protected void initializeMainWindowConfig(){
         mainwindow.read(props);
+        mainwindowDividerLocation = PropertiesUtils.intValue(props, PROP_MAINWINDOW + ".window.divide", 100);
     }
     protected void finalizeMainWindowConfig(){
         mainwindow.sync();
         mainwindow.save(props);
+        PropertiesUtils.set(props, PROP_MAINWINDOW + ".window.divide", mainwindowDividerLocation);
     }
     public WindowConfig getMainWindowConfig(){
         return mainwindow;

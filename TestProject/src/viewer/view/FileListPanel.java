@@ -108,6 +108,9 @@ public class FileListPanel extends JPanel {
                     if (item.tags.isEmpty()) {
                         label.setBackground(Color.GRAY);
                     }
+                    if (isSelected) {
+                        label.setBackground(Color.CYAN);
+                    }
             		return label;
         		} else {
         			JPanel panel = new JPanel();

@@ -4,16 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
+import javax.swing.JToggleButton;
 
 import viewer.ApplicationContext;
 import viewer.ApplicationController;
@@ -51,6 +52,16 @@ public class MainWindow extends JFrame {
 
         splitpane.setRightComponent(tagPanel);
 
+        splitpane.setDividerLocation(context.mainwindowDividerLocation);
+
+        splitpane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY,
+    	    new PropertyChangeListener() {
+    	        @Override
+    	        public void propertyChange(PropertyChangeEvent pce) {
+    	        	context.mainwindowDividerLocation = splitpane.getDividerLocation();
+    	        }
+        });
+
      // メニューの構築
         setupMenus();
 
@@ -60,28 +71,22 @@ public class MainWindow extends JFrame {
 	private void setupMenus() {
         JMenuBar menubar = new JMenuBar();
         setJMenuBar(menubar);
-        JMenu showMenu = new JMenu("表示");
-        ButtonGroup group = new ButtonGroup();
-        /* List */{
-            final JRadioButtonMenuItem item = new JRadioButtonMenuItem("List", true);
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed( ActionEvent e ){
-                    context.setImageListViewType(ApplicationContext.TYPE_VIEW_LIST);
-                }
-            });
-            showMenu.add(item);
-            group.add(item);
-        }
-        /* Table */{
-            final JRadioButtonMenuItem item = new JRadioButtonMenuItem("Detail", false);
-            item.addActionListener(new ActionListener() {
-                public void actionPerformed( ActionEvent e ){
-                    context.setImageListViewType(ApplicationContext.TYPE_VIEW_DETAIL);
-                }
-            });
-            showMenu.add(item);
-            group.add(item);
-        }
-        menubar.add(showMenu);
+		ButtonGroup group = new ButtonGroup();
+		JToggleButton listButton = new JToggleButton("List");
+		listButton.addActionListener(new ActionListener() {
+            public void actionPerformed( ActionEvent e ){
+                context.setImageListViewType(ApplicationContext.TYPE_VIEW_LIST);
+            }
+        });
+		JToggleButton detailButton = new JToggleButton("Detail");
+		detailButton.addActionListener(new ActionListener() {
+            public void actionPerformed( ActionEvent e ){
+                context.setImageListViewType(ApplicationContext.TYPE_VIEW_DETAIL);
+            }
+        });
+		group.add(listButton);
+		group.add(detailButton);
+		menubar.add(listButton);
+		menubar.add(detailButton);
 	}
 }
